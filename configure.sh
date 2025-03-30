@@ -2,4 +2,9 @@
 
 set -e
 
-env CC=clang CXX=clang++ meson setup build
+if [[ -d "./build" ]]; then
+  rm -rf ./build
+fi
+
+cmake -G Ninja \
+  -B build

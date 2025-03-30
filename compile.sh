@@ -2,4 +2,10 @@
 
 set -e
 
-meson compile -C build
+if [[ ! -d "./build" ]]; then
+  ./configure.sh
+fi
+
+pushd build
+cmake --build .
+popd

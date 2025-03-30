@@ -3,5 +3,4 @@ Thumbs.db
 
 .vscode
 
-build/**
-!build/.gitkeep
+build
