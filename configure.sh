@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-
-set -e
-
-cmake -G Ninja \
-  -B build
