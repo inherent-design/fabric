@@ -2,5 +2,4 @@
 
 set -e
 
-cmake -G Ninja \
-  -B build
+rm -rf ./build
