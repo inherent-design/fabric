@@ -3,4 +3,32 @@ Thumbs.db
 
 .vscode
 
+# Build directories
 build
+debug
+profile
+release
+
+# Compiled object files
+*.o
+*.obj
+
+# Compiled dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Executables
+*.exe
+*.out
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+compile_commands.json
+
+# IDE specific files
+.idea/
+*.swp
+*~
