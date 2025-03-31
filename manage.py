@@ -45,7 +45,16 @@ def compile():
 
 def run():
     try:
-        subprocess.run([EXECUTABLE], check=True)
+        if not os.path.exists(EXECUTABLE):
+            print("Executable not found. Compiling...")
+            compile()
+        args = sys.argv[2:]
+        if args:
+            print(f"Running with arguments: {args}")
+            subprocess.run([EXECUTABLE] + args, check=True)
+        else:
+            print("Running without arguments.")
+            subprocess.run([EXECUTABLE], check=True)
         print("Execution complete.")
     except subprocess.CalledProcessError as e:
         print(f"An error occurred during execution: {e}")
@@ -69,7 +78,7 @@ def main(task):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    if len(sys.argv) < 2:
         print("Usage: ./manage.py <task>")
         print("Available tasks:")
         print("  clean")
