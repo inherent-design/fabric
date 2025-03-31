@@ -21,13 +21,13 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(webview)
 
-# Include your own headers
-include_directories(${CMAKE_SOURCE_DIR}/include)
-
 # Source files
 file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS src/*.cpp)
 
-# Create executable
+# Include directories
+include_directories(src)
+
+# Add executable target with source files
 add_executable(fabric ${SRC_FILES})
 
 # Link with webview
