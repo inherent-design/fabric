@@ -1,7 +1,7 @@
 #ifndef SYNTAX_TREE_H
 #define SYNTAX_TREE_H
 
-#include "TokenTypes.h"
+#include "Token.h"
 #include <memory>
 #include <vector>
 
@@ -20,5 +20,10 @@ private:
   Token token;
   std::vector<std::shared_ptr<ASTNode>> children;
 };
+
+// Helper functions
+TokenType determineTokenType(const std::string &token);
+
+Variant parseValue(const std::string &token, TokenType type);
 
 #endif // SYNTAX_TREE_H
