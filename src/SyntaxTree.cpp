@@ -458,8 +458,6 @@ Variant parseValue(const std::string &token, TokenType type) {
       return token;
     }
   } catch (const std::exception &e) {
-    ErrorHandler::handleError(
-        std::runtime_error("Error parsing value: " + std::string(e.what())));
     Logger::logError("Error parsing value: " + std::string(e.what()));
     return nullptr;
   }

@@ -226,6 +226,8 @@ struct Token {
   Variant value;
 
   Token(TokenType type, Variant value = nullptr) : type(type), value(value) {}
+
+  Token() : type(TokenType::EndOfFile), value(nullptr) {}
 };
 
 #endif // TOKEN_H

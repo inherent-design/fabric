@@ -1,5 +1,7 @@
 #include "ArgumentParser.h"
 #include "Constants.g.h"
+#include "ErrorHandling.h"
+#include "Logging.h"
 #include "webview/webview.h"
 #include <iostream>
 
@@ -25,23 +27,26 @@ int main(int argc, char *argv[]) {
     bool debug = true;
 #endif
 
-    if (argc > 1) {
-      parser.parse(argc, argv);
+    parser.parse(argc, argv);
 
-      // Check for --help argument
-      if (parser.getArgument("--help")) {
-        ArgumentParser::printHelp();
-        return 0;
-      }
+    // Check for --help argument
+    if (parser.getArgument("--help")) {
+      ArgumentParser::printVersion();
+      ArgumentParser::printHelp();
+      return 0;
+    }
 
-      // Check for --version argument
-      if (parser.getArgument("--version")) {
-        ArgumentParser::printVersion();
-        return 0;
-      }
+    // Check for --version argument
+    if (parser.getArgument("--version")) {
+      ArgumentParser::printVersion();
+      return 0;
+    }
 
-      // Repeat similar checks for other arguments
-      // ...
+    // Validate required arguments
+    if (!parser.isValid()) {
+      Logger::logError(parser.getErrorMsg());
+      ArgumentParser::printHelp();
+      return 1; // Exit with error code
     }
 
     webview::webview w(debug, nullptr);
