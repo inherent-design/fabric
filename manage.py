@@ -44,11 +44,11 @@ def print_separator(message=""):
         print("=" * width)
 
 
-def run(build_type="debug"):
+def run(build_type="debug", execution_params=None):
     """Run the executable for the specified build type."""
     build_dirs = {"debug": DEBUG_DIR, "profile": PROFILE_DIR, "release": RELEASE_DIR}
     build_dir = build_dirs.get(build_type.lower(), DEBUG_DIR)
-    executable = os.path.join(build_dir, "bin", "fabric")
+    executable = os.path.join(build_dir, "bin", "Fabric")
     if os.name == "nt":
         executable += ".exe"
 
@@ -57,7 +57,7 @@ def run(build_type="debug"):
             print(f"Executable not found. Building {build_type}...")
             globals()[build_type.lower()]()
 
-        args = sys.argv[2:] if len(sys.argv) > 2 else []
+        args = execution_params if execution_params else []
         print(
             f"Running with arguments: {args}" if args else "Running without arguments"
         )
@@ -101,48 +101,33 @@ def clean_release():
     clean_directory(RELEASE_DIR)
 
 
-def debug():
-    """Build the debug configuration."""
+def build(build_dir, build_type, flags):
+    """Build the specified configuration."""
     try:
-        configure(DEBUG_DIR, "Debug", ["-DCMAKE_CXX_FLAGS_DEBUG=-g -O0"])
-        print_separator("BEGIN BUILD OUTPUT (DEBUG)")
-        subprocess.run(["cmake", "--build", DEBUG_DIR], check=True)
+        configure(build_dir, build_type, flags)
+        print_separator(f"BEGIN BUILD OUTPUT ({build_type.upper()})")
+        subprocess.run(["cmake", "--build", build_dir], check=True)
         print_separator("END BUILD OUTPUT")
-        print("Debug build complete.")
+        print(f"{build_type.capitalize()} build complete.")
     except subprocess.CalledProcessError as e:
         print_separator("END BUILD OUTPUT (WITH ERROR)")
-        print(f"Debug build failed: {e}")
+        print(f"{build_type.capitalize()} build failed: {e}")
         sys.exit(1)
+
+
+def debug():
+    """Build the debug configuration."""
+    build(DEBUG_DIR, "Debug", ["-DCMAKE_CXX_FLAGS_DEBUG=-g -O0"])
 
 
 def profile():
     """Build the profile configuration."""
-    try:
-        configure(
-            PROFILE_DIR, "RelWithDebInfo", ["-DCMAKE_CXX_FLAGS_RELWITHDEBINFO=-g -O3"]
-        )
-        print_separator("BEGIN BUILD OUTPUT (PROFILE)")
-        subprocess.run(["cmake", "--build", PROFILE_DIR], check=True)
-        print_separator("END BUILD OUTPUT")
-        print("Profile build complete.")
-    except subprocess.CalledProcessError as e:
-        print_separator("END BUILD OUTPUT (WITH ERROR)")
-        print(f"Profile build failed: {e}")
-        sys.exit(1)
+    build(PROFILE_DIR, "RelWithDebInfo", ["-DCMAKE_CXX_FLAGS_RELWITHDEBINFO=-g -O3"])
 
 
 def release():
     """Build the release configuration."""
-    try:
-        configure(RELEASE_DIR, "Release", ["-DCMAKE_CXX_FLAGS_RELEASE=-O3"])
-        print_separator("BEGIN BUILD OUTPUT (RELEASE)")
-        subprocess.run(["cmake", "--build", RELEASE_DIR], check=True)
-        print_separator("END BUILD OUTPUT")
-        print("Release build complete.")
-    except subprocess.CalledProcessError as e:
-        print_separator("END BUILD OUTPUT (WITH ERROR)")
-        print(f"Release build failed: {e}")
-        sys.exit(1)
+    build(RELEASE_DIR, "Release", ["-DCMAKE_CXX_FLAGS_RELEASE=-O3"])
 
 
 class Action(abc.ABC):
@@ -171,7 +156,7 @@ class CleanAction(Action):
 
     def conflicts_with(self, other_action):
         return isinstance(
-            other_action, (DebugAction, ProfileAction, ReleaseAction, CompileAction)
+            other_action, (DebugAction, ProfileAction, ReleaseAction, BuildAction)
         )
 
 
@@ -213,19 +198,19 @@ class CleanReleaseAction(CleanAction):
         clean_release()
 
 
-class CompileAction(Action):
+class BuildAction(Action):
     @property
     def name(self):
-        return "compile"
+        return "build"
 
     def execute(self):
         debug()
 
 
-class CompileAllAction(Action):
+class BuildAllAction(Action):
     @property
     def name(self):
-        return "compile-all"
+        return "build-all"
 
     def execute(self):
         debug()
@@ -263,13 +248,14 @@ class ReleaseAction(Action):
 class RunAction(Action):
     def __init__(self, build_type="debug"):
         self.build_type = build_type
+        self.execution_params = []  # Initialize execution parameters list
 
     @property
     def name(self):
         return f"run-{self.build_type}"
 
     def execute(self):
-        run(self.build_type)
+        run(self.build_type, self.execution_params)
 
 
 def parse_actions(commands):
@@ -280,8 +266,8 @@ def parse_actions(commands):
         "clean-profile": CleanProfileAction(),
         "clean-release": CleanReleaseAction(),
         "clean-all": CleanAllAction(),
-        "compile": CompileAction(),
-        "compile-all": CompileAllAction(),
+        "build": BuildAction(),
+        "build-all": BuildAllAction(),
         "debug": DebugAction(),
         "profile": ProfileAction(),
         "release": ReleaseAction(),
@@ -292,12 +278,33 @@ def parse_actions(commands):
     }
 
     actions = []
+    run_action_found = False
+
     for command in commands:
+        if run_action_found:
+            # Treat all subsequent commands as execution parameters
+            actions[-1].execution_params.append(command)
+            continue
+
         action = action_map.get(command)
-        if action and not any(
-            existing_action.conflicts_with(action) for existing_action in actions
-        ):
-            actions.append(action)
+        if action:
+            if isinstance(action, CleanAllAction) or isinstance(action, BuildAllAction):
+                # Remove any existing clean or build actions if clean-all or build-all is found
+                actions = [
+                    a for a in actions if not isinstance(a, (CleanAction, BuildAction))
+                ]
+            elif any(isinstance(a, (CleanAllAction, BuildAllAction)) for a in actions):
+                # Skip adding clean or build actions if clean-all or build-all is already in actions
+                continue
+
+            if not any(
+                existing_action.conflicts_with(action) for existing_action in actions
+            ):
+                actions.append(action)
+
+            if isinstance(action, RunAction):
+                run_action_found = True
+                action.execution_params = []  # Initialize execution parameters list
 
     return actions
 
@@ -317,11 +324,11 @@ def print_help():
     print("  clean-profile - Clean profile build directory")
     print("  clean-release - Clean release build directory")
     print("  clean-all   - Clean all build directories")
-    print("  compile     - Build with debug symbols and no optimization")
+    print("  build       - Build with debug symbols and no optimization")
     print("  debug       - Build with debug symbols and no optimization")
     print("  profile     - Build with debug symbols and full optimization")
     print("  release     - Build with no debug symbols and full optimization")
-    print("  compile-all - Build all configurations")
+    print("  build-all   - Build all configurations")
     print("  run         - Run the debug build")
     print("  run-debug   - Run the debug build")
     print("  run-profile - Run the profile build")
