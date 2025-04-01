@@ -5,6 +5,18 @@
 #include "webview/webview.h"
 #include <iostream>
 
+void printVersion() {
+  std::cout << APP_NAME << " v" << APP_VERSION << std::endl;
+}
+
+void printHelp() {
+  printVersion();
+  std::cout << "Usage: " << APP_EXECUTABLE_NAME << " [options]\n"
+            << "Options:\n"
+            << "  --help       Show this help message\n"
+            << "  --version    Show version information\n";
+}
+
 #if defined(_WIN32)
 #include <windows.h>
 int WINAPI WinMain(HINSTANCE /*hInst*/, HINSTANCE /*hPrevInst*/,
@@ -29,8 +41,7 @@ int main(int argc, char *argv[]) {
 
     // Check for --help argument
     if (parser.getArgument("--help")) {
-      ArgumentParser::printVersion();
-      ArgumentParser::printHelp();
+      printHelp();
       return 0;
     }
 
@@ -58,16 +69,4 @@ int main(int argc, char *argv[]) {
   }
 
   return 0;
-}
-
-void printVersion() {
-  std::cout << APP_NAME << " v" << APP_VERSION << std::endl;
-}
-
-void printHelp() {
-  printVersion();
-  std::cout << "Usage: " << APP_EXECUTABLE_NAME << " [options]\n"
-            << "Options:\n"
-            << "  --help       Show this help message\n"
-            << "  --version    Show version information\n"
 }
