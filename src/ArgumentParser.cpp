@@ -57,8 +57,6 @@ void ArgumentParser::parse(int argc, char *argv[]) {
     validateArgs(availableArgs);
     if (!valid)
       return;
-
-    Logger::logInfo("Arguments parsed successfully.");
   } catch (const std::exception &e) {
     Logger::logError("Error parsing arguments: " + std::string(e.what()));
   }
@@ -105,8 +103,6 @@ void ArgumentParser::parse(const std::string &args) {
     validateArgs(availableArgs);
     if (!valid)
       return;
-
-    Logger::logInfo("Arguments parsed successfully.");
   } catch (const std::exception &e) {
     Logger::logError("Error parsing arguments: " + std::string(e.what()));
   }
@@ -148,16 +144,11 @@ ArgumentParserBuilder &ArgumentParserBuilder::addOption(const std::string &name,
                                                         TokenType type,
                                                         bool optional) {
   options[name] = {type, optional};
-  Logger::logInfo("Option added: " + name);
   return *this;
 }
 
 ArgumentParser ArgumentParserBuilder::build() const {
   ArgumentParser parser;
-
-  // Store options in the parser for later validation
   parser.availableArgs = options;
-
-  Logger::logInfo("ArgumentParser built successfully.");
   return parser;
 }
