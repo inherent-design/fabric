@@ -3,10 +3,10 @@
 
 #define APP_NAME "Fabric"
 #if defined(_WIN32)
-#define APP_EXECUTABLE_NAME "fabric.exe"
+#define APP_EXECUTABLE_NAME "Fabric.exe"
 #else
-#define APP_EXECUTABLE_NAME "fabric"
+#define APP_EXECUTABLE_NAME "Fabric"
 #endif
-#define APP_VERSION "1.0.0"
+#define APP_VERSION "0.1.0"
 
 #endif // CONSTANTS_G_H
