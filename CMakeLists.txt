@@ -64,6 +64,8 @@ endif()
 if(WIN32)
     message(STATUS "Configuring for Windows")
 
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-subsystem:windows")
+
     target_link_libraries(fabric
         PRIVATE
             advapi32
