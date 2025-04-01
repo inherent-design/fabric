@@ -24,6 +24,7 @@ def configure(build_dir, build_type, options=None):
             "-B",
             build_dir,
             "-DCMAKE_BUILD_TYPE=" + build_type,
+            f"-DCMAKE_CACHEFILE_DIR={build_dir}",  # Add flag for cache location
         ]
         if options:
             cmake_args.extend(options)
