@@ -154,11 +154,6 @@ class CleanAction(Action):
     def execute(self):
         clean_debug()
 
-    def conflicts_with(self, other_action):
-        return isinstance(
-            other_action, (DebugAction, ProfileAction, ReleaseAction, BuildAction)
-        )
-
 
 class CleanAllAction(Action):
     @property
@@ -279,6 +274,8 @@ def parse_actions(commands):
 
     actions = []
     run_action_found = False
+    clean_all_found = False
+    build_all_found = False
 
     for command in commands:
         if run_action_found:
@@ -288,14 +285,10 @@ def parse_actions(commands):
 
         action = action_map.get(command)
         if action:
-            if isinstance(action, CleanAllAction) or isinstance(action, BuildAllAction):
-                # Remove any existing clean or build actions if clean-all or build-all is found
-                actions = [
-                    a for a in actions if not isinstance(a, (CleanAction, BuildAction))
-                ]
-            elif any(isinstance(a, (CleanAllAction, BuildAllAction)) for a in actions):
-                # Skip adding clean or build actions if clean-all or build-all is already in actions
-                continue
+            if isinstance(action, CleanAllAction):
+                clean_all_found = True
+            elif isinstance(action, BuildAllAction):
+                build_all_found = True
 
             if not any(
                 existing_action.conflicts_with(action) for existing_action in actions
@@ -305,6 +298,14 @@ def parse_actions(commands):
             if isinstance(action, RunAction):
                 run_action_found = True
                 action.execution_params = []  # Initialize execution parameters list
+
+    # If clean-all is found, remove all other clean actions
+    if clean_all_found:
+        actions = [action for action in actions if not isinstance(action, CleanAction)]
+
+    # If build-all is found, remove all other build actions
+    if build_all_found:
+        actions = [action for action in actions if not isinstance(action, BuildAction)]
 
     return actions
 
