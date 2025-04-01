@@ -54,45 +54,13 @@ def configure(build_dir, build_type, options=None):
         sys.exit(1)
 
 
-def debug():
-    """Build with debug symbols and no optimization"""
-    try:
-        configure(DEBUG_DIR, "Debug", ["-DCMAKE_CXX_FLAGS_DEBUG=-g -O0"])
-        subprocess.run(["cmake", "--build", DEBUG_DIR], check=True)
-        print("Debug build complete.")
-    except subprocess.CalledProcessError as e:
-        print(f"Debug build failed: {e}")
-        sys.exit(1)
-
-
-def profile():
-    """Build with debug symbols and full optimization"""
-    try:
-        configure(
-            PROFILE_DIR, "RelWithDebInfo", ["-DCMAKE_CXX_FLAGS_RELWITHDEBINFO=-g -O3"]
-        )
-        subprocess.run(["cmake", "--build", PROFILE_DIR], check=True)
-        print("Profile build complete.")
-    except subprocess.CalledProcessError as e:
-        print(f"Profile build failed: {e}")
-        sys.exit(1)
-
-
-def release():
-    """Build with no debug symbols and full optimization"""
-    try:
-        configure(RELEASE_DIR, "Release", ["-DCMAKE_CXX_FLAGS_RELEASE=-O3"])
-        subprocess.run(["cmake", "--build", RELEASE_DIR], check=True)
-        print("Release build complete.")
-    except subprocess.CalledProcessError as e:
-        print(f"Release build failed: {e}")
-        sys.exit(1)
-
-
-# Keep the original compile function but make it use debug
-def compile():
-    debug()
-
+def print_separator(message=""):
+    width = 80
+    if message:
+        padding = (width - len(message) - 2) // 2
+        print("=" * padding + " " + message + " " + "=" * padding)
+    else:
+        print("=" * width)
 
 def run(build_type="debug"):
     """Run the executable with optional arguments"""
@@ -109,14 +77,67 @@ def run(build_type="debug"):
         args = sys.argv[2:] if len(sys.argv) > 2 else []
         if args:
             print(f"Running with arguments: {args}")
-            subprocess.run([executable] + args, check=True)
         else:
             print("Running without arguments")
-            subprocess.run([executable], check=True)
+            
+        print_separator(f"BEGIN FABRIC OUTPUT ({build_type})")
+        subprocess.run([executable] + (args if args else []), check=True)
+        print_separator("END FABRIC OUTPUT")
+        
         print("Execution complete.")
     except subprocess.CalledProcessError as e:
+        print_separator("END FABRIC OUTPUT (WITH ERROR)")
         print(f"Execution failed: {e}")
         sys.exit(1)
+
+# Also update the build commands to use separators
+def debug():
+    """Build with debug symbols and no optimization"""
+    try:
+        configure(DEBUG_DIR, "Debug", ["-DCMAKE_CXX_FLAGS_DEBUG=-g -O0"])
+        print_separator("BEGIN BUILD OUTPUT (DEBUG)")
+        subprocess.run(["cmake", "--build", DEBUG_DIR], check=True)
+        print_separator("END BUILD OUTPUT")
+        print("Debug build complete.")
+    except subprocess.CalledProcessError as e:
+        print_separator("END BUILD OUTPUT (WITH ERROR)")
+        print(f"Debug build failed: {e}")
+        sys.exit(1)
+
+
+def profile():
+    """Build with debug symbols and full optimization"""
+    try:
+        configure(
+            PROFILE_DIR, "RelWithDebInfo", ["-DCMAKE_CXX_FLAGS_RELWITHDEBINFO=-g -O3"]
+        )
+        print_separator("BEGIN BUILD OUTPUT (PROFILE)")
+        subprocess.run(["cmake", "--build", PROFILE_DIR], check=True)
+        print_separator("END BUILD OUTPUT")
+        print("Profile build complete.")
+    except subprocess.CalledProcessError as e:
+        print_separator("END BUILD OUTPUT (WITH ERROR)")
+        print(f"Profile build failed: {e}")
+        sys.exit(1)
+
+
+def release():
+    """Build with no debug symbols and full optimization"""
+    try:
+        configure(RELEASE_DIR, "Release", ["-DCMAKE_CXX_FLAGS_RELEASE=-O3"])
+        print_separator("BEGIN BUILD OUTPUT (RELEASE)")
+        subprocess.run(["cmake", "--build", RELEASE_DIR], check=True)
+        print_separator("END BUILD OUTPUT")
+        print("Release build complete.")
+    except subprocess.CalledProcessError as e:
+        print_separator("END BUILD OUTPUT (WITH ERROR)")
+        print(f"Release build failed: {e}")
+        sys.exit(1)
+
+
+# Keep the original compile function but make it use debug
+def compile():
+    debug()
 
 
 def print_help():
