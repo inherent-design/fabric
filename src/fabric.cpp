@@ -13,13 +13,11 @@ int WINAPI WinMain(HINSTANCE /*hInst*/, HINSTANCE /*hPrevInst*/,
 int main(int argc, char *argv[]) {
 #endif
   try {
-    // Define common CLI arguments using ArgumentParserBuilder
-    ArgumentParserBuilder builder;
-    builder.addOption("--version", TokenType::LiteralString, true)
-        .addOption("--help", TokenType::LiteralString, true)
-        .addOption("--testValue", TokenType::LiteralFloat, false);
-
-    ArgumentParser parser = builder.build();
+    ArgumentParserBuilder parserBuilder;
+    ArgumentParser parser;
+    parserBuilder.addOption("--version", TokenType::LiteralString, true)
+        .addOption("--help", TokenType::LiteralString, true);
+    parser = parserBuilder.build();
 
 #if defined(_WIN32)
     bool debug = false;
@@ -38,14 +36,14 @@ int main(int argc, char *argv[]) {
 
     // Check for --version argument
     if (parser.getArgument("--version")) {
-      ArgumentParser::printVersion();
+      printVersion();
       return 0;
     }
 
     // Validate required arguments
     if (!parser.isValid()) {
       Logger::logError(parser.getErrorMsg());
-      ArgumentParser::printHelp();
+      printHelp();
       return 1; // Exit with error code
     }
 
@@ -60,4 +58,16 @@ int main(int argc, char *argv[]) {
   }
 
   return 0;
+}
+
+void printVersion() {
+  std::cout << APP_NAME << " v" << APP_VERSION << std::endl;
+}
+
+void printHelp() {
+  printVersion();
+  std::cout << "Usage: " << APP_EXECUTABLE_NAME << " [options]\n"
+            << "Options:\n"
+            << "  --help       Show this help message\n"
+            << "  --version    Show version information\n"
 }

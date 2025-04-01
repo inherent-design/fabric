@@ -23,10 +23,6 @@ public:
   bool validateArgs(
       const std::map<std::string, std::pair<TokenType, bool>> &options);
 
-  // Static methods for help and version
-  static void printHelp();
-  static void printVersion();
-
 private:
   std::map<std::string, Token> arguments;
   std::map<std::string, std::pair<TokenType, bool>> availableArgs;

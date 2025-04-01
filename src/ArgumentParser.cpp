@@ -161,17 +161,3 @@ ArgumentParser ArgumentParserBuilder::build() const {
   Logger::logInfo("ArgumentParser built successfully.");
   return parser;
 }
-
-// Static method to print help information
-void ArgumentParser::printHelp() {
-  std::cout << "Usage: fabric [options]\n"
-            << "Options:\n"
-            << "  --help       Show this help message\n"
-            << "  --version    Show version information\n"
-            << "  ...          Other options\n";
-}
-
-// Static method to print version information
-void ArgumentParser::printVersion() {
-  std::cout << "Fabric Engine Version: " << VERSION << std::endl;
-}
