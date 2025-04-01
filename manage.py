@@ -3,41 +3,18 @@
 import os
 import subprocess
 import sys
+import abc
 
-# Define global project variables
+# Define global project directories
 DEBUG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "debug")
 PROFILE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "profile")
 RELEASE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "release")
-BUILD_DIR = DEBUG_DIR  # Default to debug build
-
-
-def get_executable(build_dir):
-    executable = os.path.join(build_dir, "bin", "fabric")
-    if os.name == "nt":  # Check if the operating system is Windows
-        executable = os.path.join(build_dir, "bin", "fabric.exe")
-    return executable
-
-
-def clean():
-    try:
-        for dir_path in [DEBUG_DIR, PROFILE_DIR, RELEASE_DIR]:
-            if os.path.exists(dir_path):
-                for root, dirs, files in os.walk(dir_path, topdown=False):
-                    for name in files:
-                        os.remove(os.path.join(root, name))
-                    for name in dirs:
-                        os.rmdir(os.path.join(root, name))
-                os.rmdir(dir_path)
-        print("Cleaned build directories.")
-    except Exception as e:
-        print(f"An error occurred during cleaning: {e}")
 
 
 def configure(build_dir, build_type, options=None):
+    """Configure the build environment using CMake."""
     try:
-        if not os.path.exists(build_dir):
-            os.makedirs(build_dir)
-
+        os.makedirs(build_dir, exist_ok=True)
         cmake_args = [
             "cmake",
             "-G",
@@ -46,30 +23,10 @@ def configure(build_dir, build_type, options=None):
             ".",
             "-B",
             build_dir,
-            # Explicitly set the cache directory to be inside the build directory
-            f"-DCMAKE_CACHEFILE_DIR={build_dir}",
+            "-DCMAKE_BUILD_TYPE=" + build_type,
         ]
-
-        # Add build type
-        cmake_args.extend(["-DCMAKE_BUILD_TYPE=" + build_type])
-
-        # Set compiler based on platform
-        if os.name == "nt":  # Windows
-            # On Windows, prefer MSVC if available
-            pass  # CMake will automatically select MSVC on Windows
-        else:
-            # On non-Windows platforms, prefer Clang
-            import shutil
-
-            if shutil.which("clang++"):
-                cmake_args.extend(["-DCMAKE_CXX_COMPILER=clang++"])
-            elif shutil.which("clang"):
-                cmake_args.extend(["-DCMAKE_CXX_COMPILER=clang"])
-
-        # Add any additional options
         if options:
             cmake_args.extend(options)
-
         subprocess.run(cmake_args, check=True)
         print(f"Configuration complete for {build_type} build.")
     except subprocess.CalledProcessError as e:
@@ -78,6 +35,7 @@ def configure(build_dir, build_type, options=None):
 
 
 def print_separator(message=""):
+    """Print a separator line with an optional message."""
     width = 80
     if message:
         padding = (width - len(message) - 2) // 2
@@ -87,11 +45,12 @@ def print_separator(message=""):
 
 
 def run(build_type="debug"):
-    """Run the executable with optional arguments"""
+    """Run the executable for the specified build type."""
     build_dirs = {"debug": DEBUG_DIR, "profile": PROFILE_DIR, "release": RELEASE_DIR}
-
     build_dir = build_dirs.get(build_type.lower(), DEBUG_DIR)
-    executable = get_executable(build_dir)
+    executable = os.path.join(build_dir, "bin", "fabric")
+    if os.name == "nt":
+        executable += ".exe"
 
     try:
         if not os.path.exists(executable):
@@ -99,15 +58,12 @@ def run(build_type="debug"):
             globals()[build_type.lower()]()
 
         args = sys.argv[2:] if len(sys.argv) > 2 else []
-        if args:
-            print(f"Running with arguments: {args}")
-        else:
-            print("Running without arguments")
-
+        print(
+            f"Running with arguments: {args}" if args else "Running without arguments"
+        )
         print_separator(f"BEGIN FABRIC OUTPUT ({build_type})")
-        subprocess.run([executable] + (args if args else []), check=True)
+        subprocess.run([executable] + args, check=True)
         print_separator("END FABRIC OUTPUT")
-
         print("Execution complete.")
     except subprocess.CalledProcessError as e:
         print_separator("END FABRIC OUTPUT (WITH ERROR)")
@@ -115,9 +71,38 @@ def run(build_type="debug"):
         sys.exit(1)
 
 
-# Also update the build commands to use separators
+def clean_directory(directory):
+    """Remove all files and subdirectories in the specified directory."""
+    try:
+        if os.path.exists(directory):
+            for root, dirs, files in os.walk(directory, topdown=False):
+                for name in files:
+                    os.remove(os.path.join(root, name))
+                for name in dirs:
+                    os.rmdir(os.path.join(root, name))
+            os.rmdir(directory)
+        print(f"Cleaned {os.path.basename(directory)} build directory.")
+    except Exception as e:
+        print(f"An error occurred during cleaning {os.path.basename(directory)}: {e}")
+
+
+def clean_debug():
+    """Clean the debug build directory."""
+    clean_directory(DEBUG_DIR)
+
+
+def clean_profile():
+    """Clean the profile build directory."""
+    clean_directory(PROFILE_DIR)
+
+
+def clean_release():
+    """Clean the release build directory."""
+    clean_directory(RELEASE_DIR)
+
+
 def debug():
-    """Build with debug symbols and no optimization"""
+    """Build the debug configuration."""
     try:
         configure(DEBUG_DIR, "Debug", ["-DCMAKE_CXX_FLAGS_DEBUG=-g -O0"])
         print_separator("BEGIN BUILD OUTPUT (DEBUG)")
@@ -131,7 +116,7 @@ def debug():
 
 
 def profile():
-    """Build with debug symbols and full optimization"""
+    """Build the profile configuration."""
     try:
         configure(
             PROFILE_DIR, "RelWithDebInfo", ["-DCMAKE_CXX_FLAGS_RELWITHDEBINFO=-g -O3"]
@@ -147,7 +132,7 @@ def profile():
 
 
 def release():
-    """Build with no debug symbols and full optimization"""
+    """Build the release configuration."""
     try:
         configure(RELEASE_DIR, "Release", ["-DCMAKE_CXX_FLAGS_RELEASE=-O3"])
         print_separator("BEGIN BUILD OUTPUT (RELEASE)")
@@ -160,23 +145,187 @@ def release():
         sys.exit(1)
 
 
-# Keep the original compile function but make it use debug
-def compile():
-    debug()
+class Action(abc.ABC):
+    """Abstract base class for actions."""
+
+    @property
+    @abc.abstractmethod
+    def name(self):
+        pass
+
+    @abc.abstractmethod
+    def execute(self):
+        pass
+
+    def conflicts_with(self, other_action):
+        return False
+
+
+class CleanAction(Action):
+    @property
+    def name(self):
+        return "clean"
+
+    def execute(self):
+        clean_debug()
+
+    def conflicts_with(self, other_action):
+        return isinstance(
+            other_action, (DebugAction, ProfileAction, ReleaseAction, CompileAction)
+        )
+
+
+class CleanAllAction(Action):
+    @property
+    def name(self):
+        return "clean-all"
+
+    def execute(self):
+        clean_debug()
+        clean_profile()
+        clean_release()
+
+
+class CleanDebugAction(CleanAction):
+    @property
+    def name(self):
+        return "clean-debug"
+
+    def execute(self):
+        clean_debug()
+
+
+class CleanProfileAction(CleanAction):
+    @property
+    def name(self):
+        return "clean-profile"
+
+    def execute(self):
+        clean_profile()
+
+
+class CleanReleaseAction(CleanAction):
+    @property
+    def name(self):
+        return "clean-release"
+
+    def execute(self):
+        clean_release()
+
+
+class CompileAction(Action):
+    @property
+    def name(self):
+        return "compile"
+
+    def execute(self):
+        debug()
+
+
+class CompileAllAction(Action):
+    @property
+    def name(self):
+        return "compile-all"
+
+    def execute(self):
+        debug()
+        profile()
+        release()
+
+
+class DebugAction(Action):
+    @property
+    def name(self):
+        return "debug"
+
+    def execute(self):
+        debug()
+
+
+class ProfileAction(Action):
+    @property
+    def name(self):
+        return "profile"
+
+    def execute(self):
+        profile()
+
+
+class ReleaseAction(Action):
+    @property
+    def name(self):
+        return "release"
+
+    def execute(self):
+        release()
+
+
+class RunAction(Action):
+    def __init__(self, build_type="debug"):
+        self.build_type = build_type
+
+    @property
+    def name(self):
+        return f"run-{self.build_type}"
+
+    def execute(self):
+        run(self.build_type)
+
+
+def parse_actions(commands):
+    """Parse and optimize actions based on the provided commands."""
+    action_map = {
+        "clean": CleanAction(),
+        "clean-debug": CleanDebugAction(),
+        "clean-profile": CleanProfileAction(),
+        "clean-release": CleanReleaseAction(),
+        "clean-all": CleanAllAction(),
+        "compile": CompileAction(),
+        "compile-all": CompileAllAction(),
+        "debug": DebugAction(),
+        "profile": ProfileAction(),
+        "release": ReleaseAction(),
+        "run": RunAction("debug"),
+        "run-debug": RunAction("debug"),
+        "run-profile": RunAction("profile"),
+        "run-release": RunAction("release"),
+    }
+
+    actions = []
+    for command in commands:
+        action = action_map.get(command)
+        if action and not any(
+            existing_action.conflicts_with(action) for existing_action in actions
+        ):
+            actions.append(action)
+
+    return actions
+
+
+def execute_actions(actions):
+    """Execute the list of actions."""
+    for action in actions:
+        action.execute()
 
 
 def print_help():
+    """Print the help message with available commands."""
     print("Usage: ./manage.py <command>")
     print("Available commands:")
+    print("  clean       - Clean debug build directory")
+    print("  clean-debug - Clean debug build directory")
+    print("  clean-profile - Clean profile build directory")
+    print("  clean-release - Clean release build directory")
+    print("  clean-all   - Clean all build directories")
+    print("  compile     - Build with debug symbols and no optimization")
     print("  debug       - Build with debug symbols and no optimization")
     print("  profile     - Build with debug symbols and full optimization")
     print("  release     - Build with no debug symbols and full optimization")
-    print("  compile     - Alias for debug")
+    print("  compile-all - Build all configurations")
     print("  run         - Run the debug build")
     print("  run-debug   - Run the debug build")
     print("  run-profile - Run the profile build")
     print("  run-release - Run the release build")
-    print("  clean       - Clean all build directories")
     print("  help        - Show this help message")
 
 
@@ -185,29 +334,6 @@ if __name__ == "__main__":
         print_help()
         sys.exit(1)
 
-    command = sys.argv[1]
-    commands = {
-        "configure": lambda: configure(DEBUG_DIR, "Debug"),
-        "debug": debug,
-        "profile": profile,
-        "release": release,
-        "compile": compile,  # Keep for backward compatibility
-        "run": lambda: run("debug"),
-        "clean": clean,
-        "help": print_help,
-    }
-
-    if command in commands:
-        commands[command]()
-    elif command.startswith("run-"):
-        # Allow run-debug, run-profile, run-release
-        build_type = command[4:]
-        if build_type in ["debug", "profile", "release"]:
-            run(build_type)
-        else:
-            print(f"Unknown build type: {build_type}")
-            sys.exit(1)
-    else:
-        print(f"Unknown command: {command}")
-        print_help()
-        sys.exit(1)
+    commands = sys.argv[1:]
+    actions = parse_actions(commands)
+    execute_actions(actions)
