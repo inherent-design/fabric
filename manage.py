@@ -38,10 +38,33 @@ def configure(build_dir, build_type, options=None):
         if not os.path.exists(build_dir):
             os.makedirs(build_dir)
 
-        cmake_args = ["cmake", "-G", "Ninja", "-S", ".", "-B", build_dir]
+        cmake_args = [
+            "cmake",
+            "-G",
+            "Ninja",
+            "-S",
+            ".",
+            "-B",
+            build_dir,
+            # Explicitly set the cache directory to be inside the build directory
+            f"-DCMAKE_CACHEFILE_DIR={build_dir}",
+        ]
 
         # Add build type
         cmake_args.extend(["-DCMAKE_BUILD_TYPE=" + build_type])
+
+        # Set compiler based on platform
+        if os.name == "nt":  # Windows
+            # On Windows, prefer MSVC if available
+            pass  # CMake will automatically select MSVC on Windows
+        else:
+            # On non-Windows platforms, prefer Clang
+            import shutil
+
+            if shutil.which("clang++"):
+                cmake_args.extend(["-DCMAKE_CXX_COMPILER=clang++"])
+            elif shutil.which("clang"):
+                cmake_args.extend(["-DCMAKE_CXX_COMPILER=clang"])
 
         # Add any additional options
         if options:
@@ -62,6 +85,7 @@ def print_separator(message=""):
     else:
         print("=" * width)
 
+
 def run(build_type="debug"):
     """Run the executable with optional arguments"""
     build_dirs = {"debug": DEBUG_DIR, "profile": PROFILE_DIR, "release": RELEASE_DIR}
@@ -79,16 +103,17 @@ def run(build_type="debug"):
             print(f"Running with arguments: {args}")
         else:
             print("Running without arguments")
-            
+
         print_separator(f"BEGIN FABRIC OUTPUT ({build_type})")
         subprocess.run([executable] + (args if args else []), check=True)
         print_separator("END FABRIC OUTPUT")
-        
+
         print("Execution complete.")
     except subprocess.CalledProcessError as e:
         print_separator("END FABRIC OUTPUT (WITH ERROR)")
         print(f"Execution failed: {e}")
         sys.exit(1)
+
 
 # Also update the build commands to use separators
 def debug():
