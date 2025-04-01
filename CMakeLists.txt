@@ -107,10 +107,10 @@ file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS src/*.cpp)
 include_directories(src)
 
 # Define the main executable target
-add_executable(fabric ${SRC_FILES})
+add_executable(Fabric ${SRC_FILES})
 
 # Link with core dependencies
-target_link_libraries(fabric PRIVATE SDL3::SDL3-static webview::core)
+target_link_libraries(Fabric PRIVATE SDL3::SDL3-static webview::core)
 
 #------------------------------------------------------------------------------
 # Platform-Specific Configuration
@@ -142,7 +142,7 @@ if(APPLE)
 
     # Link with macOS frameworks
     foreach(FRAMEWORK ${MACOS_FRAMEWORKS})
-        target_link_libraries(fabric PRIVATE "-framework ${FRAMEWORK}")
+        target_link_libraries(Fabric PRIVATE "-framework ${FRAMEWORK}")
     endforeach()
 endif()
 
@@ -169,7 +169,7 @@ if(IOS)
 
     # Link with iOS frameworks
     foreach(FRAMEWORK ${IOS_FRAMEWORKS})
-        target_link_libraries(fabric PRIVATE "-framework ${FRAMEWORK}")
+        target_link_libraries(Fabric PRIVATE "-framework ${FRAMEWORK}")
     endforeach()
 endif()
 
@@ -202,8 +202,8 @@ if(UNIX AND NOT APPLE)
     # Find and link Linux dependencies
     foreach(DEP ${LINUX_DEPENDENCIES})
         pkg_check_modules(${DEP} REQUIRED ${DEP})
-        target_include_directories(fabric PRIVATE ${${DEP}_INCLUDE_DIRS})
-        target_link_libraries(fabric PRIVATE ${${DEP}_LIBRARIES})
+        target_include_directories(Fabric PRIVATE ${${DEP}_INCLUDE_DIRS})
+        target_link_libraries(Fabric PRIVATE ${${DEP}_LIBRARIES})
     endforeach()
 endif()
 
@@ -238,5 +238,5 @@ if(WIN32)
     )
 
     # Link with Windows libraries
-    target_link_libraries(fabric PRIVATE ${WINDOWS_LIBRARIES})
+    target_link_libraries(Fabric PRIVATE ${WINDOWS_LIBRARIES})
 endif()
