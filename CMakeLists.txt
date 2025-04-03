@@ -228,8 +228,13 @@ if(WIN32)
         NTDDI_VERSION=0x06010000
     )
 
-    # Configure as Windows GUI application
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS")
+    # Configure as Windows GUI application - Fix the subsystem conflict
+    set_target_properties(Fabric PROPERTIES
+        WIN32_EXECUTABLE TRUE
+    )
+
+    # Remove the conflicting linker flag
+    # set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS")
 
     # Required Windows libraries
     set(WINDOWS_LIBRARIES
