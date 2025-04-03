@@ -1,4 +1,4 @@
-#include "ErrorHandling.h"
+#include "ErrorHandling.hh"
 #include <iostream>
 
 void ErrorHandler::throwError(const std::string &message) {

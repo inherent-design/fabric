@@ -1,6 +1,8 @@
 # Fabric Engine - CMake Build Configuration
 # Minimum required CMake version
 cmake_minimum_required(VERSION 3.16)
+
+# Project definition
 project(fabric
     VERSION 0.1.0
     DESCRIPTION "Fabric Engine"
@@ -23,13 +25,21 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 
-# Build type specific compiler flags
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -g -O3")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
-
 # Enable position independent code for static libraries
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+# Platform-specific compiler flags
+if(WIN32)
+    # Windows compiler flags
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Zi /Od")
+    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} /Zi /dynamicdeopt")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2")
+else()
+    # Unix-like compiler flags (Linux, macOS)
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0")
+    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -g -O3")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
+endif()
 
 #------------------------------------------------------------------------------
 # Generate Constants Header
@@ -40,8 +50,8 @@ set(APP_VERSION "${PROJECT_VERSION}")
 
 # Configure Constants.g.h file
 configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Constants.g.h.in
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Constants.g.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Constants.g.hh.in
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Constants.g.hh
     @ONLY
 )
 
@@ -101,7 +111,7 @@ FetchContent_MakeAvailable(SDL3 webview)
 # Source Files and Target Configuration
 #------------------------------------------------------------------------------
 # Gather all source files
-file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS src/*.cpp)
+file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS src/*.cc)
 
 # Include project headers
 include_directories(src)
@@ -239,4 +249,10 @@ if(WIN32)
 
     # Link with Windows libraries
     target_link_libraries(Fabric PRIVATE ${WINDOWS_LIBRARIES})
+endif()
+
+# Ensure CMake uses the flags passed from the command line
+# This is critical for ActionMan.py to pass compiler flags
+if(CMAKE_CXX_FLAGS)
+    message(STATUS "Using compiler flags from command line: ${CMAKE_CXX_FLAGS}")
 endif()

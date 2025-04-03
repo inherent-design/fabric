@@ -1,7 +1,7 @@
-#include "ArgumentParser.h"
-#include "Constants.g.h"
-#include "ErrorHandling.h"
-#include "Logging.h"
+#include "ArgumentParser.hh"
+#include "Constants.g.hh"
+#include "ErrorHandling.hh"
+#include "Logging.hh"
 #include "webview/webview.h"
 #include <iostream>
 

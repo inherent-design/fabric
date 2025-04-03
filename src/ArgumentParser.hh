@@ -1,7 +1,6 @@
-#ifndef ARGUMENT_PARSER_H
-#define ARGUMENT_PARSER_H
+#pragma once
 
-#include "SyntaxTree.h"
+#include "SyntaxTree.hh"
 #include <map>
 #include <optional>
 #include <variant>
@@ -50,5 +49,3 @@ public:
 private:
   std::map<std::string, std::pair<TokenType, bool>> options;
 };
-
-#endif // ARGUMENT_PARSER_H

@@ -1,5 +1,4 @@
-#ifndef TOKEN_H
-#define TOKEN_H
+#pragma once
 
 #include <string>
 #include <variant>
@@ -229,5 +228,3 @@ struct Token {
 
   Token() : type(TokenType::EndOfFile), value(nullptr) {}
 };
-
-#endif // TOKEN_H

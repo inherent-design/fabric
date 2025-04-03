@@ -1,7 +1,6 @@
-#ifndef SYNTAX_TREE_H
-#define SYNTAX_TREE_H
+#pragma once
 
-#include "Token.h"
+#include "Token.hh"
 #include <memory>
 #include <vector>
 
@@ -25,5 +24,3 @@ private:
 TokenType determineTokenType(const std::string &token);
 
 Variant parseValue(const std::string &token, TokenType type);
-
-#endif // SYNTAX_TREE_H

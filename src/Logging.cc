@@ -1,4 +1,4 @@
-#include "Logging.h"
+#include "Logging.hh"
 #include <iostream>
 
 void Logger::logInfo(const std::string &message) {

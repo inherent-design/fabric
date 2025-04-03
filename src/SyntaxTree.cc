@@ -1,6 +1,6 @@
-#include "SyntaxTree.h"
-#include "ErrorHandling.h"
-#include "Logging.h"
+#include "SyntaxTree.hh"
+#include "ErrorHandling.hh"
+#include "Logging.hh"
 
 ASTNode::ASTNode(const Token &token) : token(token) {}
 
