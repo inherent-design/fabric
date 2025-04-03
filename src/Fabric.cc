@@ -18,7 +18,9 @@ void printHelp() {
 }
 
 #if defined(_WIN32)
+#include <shellapi.h> // Add this header for CommandLineToArgvW
 #include <windows.h>
+
 int WINAPI WinMain(HINSTANCE /*hInst*/, HINSTANCE /*hPrevInst*/,
                    LPSTR /*lpCmdLine*/, int /*nCmdShow*/) {
   // Get command line arguments on Windows
