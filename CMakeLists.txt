@@ -255,9 +255,3 @@ if(WIN32)
     # Link with Windows libraries
     target_link_libraries(Fabric PRIVATE ${WINDOWS_LIBRARIES})
 endif()
-
-# Ensure CMake uses the flags passed from the command line
-# This is critical for ActionMan.py to pass compiler flags
-if(CMAKE_CXX_FLAGS)
-    message(STATUS "Using compiler flags from command line: ${CMAKE_CXX_FLAGS}")
-endif()
