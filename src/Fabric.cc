@@ -5,13 +5,11 @@
 #include "webview/webview.h"
 #include <iostream>
 
-void printVersion()
-{
+void printVersion() {
   std::cout << APP_NAME << " v" << APP_VERSION << std::endl;
 }
 
-void printHelp()
-{
+void printHelp() {
   printVersion();
   std::cout << "Usage: " << APP_EXECUTABLE_NAME << " [options]\n"
             << "Options:\n"
@@ -20,20 +18,21 @@ void printHelp()
 }
 
 #if defined(_WIN32)
+#include <fcntl.h>    // For _O_TEXT
+#include <io.h>       // For _open_osfhandle
 #include <shellapi.h> // Add this header for CommandLineToArgvW
 #include <windows.h>
 
 int WINAPI WinMain(HINSTANCE /*hInst*/, HINSTANCE /*hPrevInst*/,
-                   PSTR lpCmdLine, int /*nCmdShow*/)
-{
+                   PSTR /*lpCmdLine*/, int /*nCmdShow*/) {
+
   // Get command line arguments on Windows
   int argc = 0;
   LPWSTR *argvW = CommandLineToArgvW(GetCommandLineW(), &argc);
 
   // Convert wide strings to regular strings
   char **argv = new char *[argc];
-  for (int i = 0; i < argc; i++)
-  {
+  for (int i = 0; i < argc; i++) {
     int size = WideCharToMultiByte(CP_UTF8, 0, argvW[i], -1, nullptr, 0,
                                    nullptr, nullptr);
     argv[i] = new char[size];
@@ -43,11 +42,9 @@ int WINAPI WinMain(HINSTANCE /*hInst*/, HINSTANCE /*hPrevInst*/,
   LocalFree(argvW);
 
 #else
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
 #endif
-  try
-  {
+  try {
     Fabric::ArgumentParserBuilder parserBuilder;
     Fabric::ArgumentParser parser;
     parserBuilder.addOption("--version", Fabric::TokenType::LiteralString, true)
@@ -58,14 +55,26 @@ int main(int argc, char *argv[])
 
     parser.parse(argc, argv);
 
+#if defined(_WIN32)
+    // Only allocate a console for output on Windows when in debug mode
+    if (debug) {
+      AllocConsole();
+
+      // Redirect stdout to the console
+      FILE *pConsole;
+      freopen_s(&pConsole, "CONOUT$", "w", stdout);
+
+      // Redirect stderr to the console
+      freopen_s(&pConsole, "CONOUT$", "w", stderr);
+    }
+#endif
+
     // Check for --help argument
-    if (parser.getArgument("--help"))
-    {
+    if (parser.getArgument("--help")) {
       printHelp();
 #if defined(_WIN32)
       // Clean up allocated memory before returning
-      for (int i = 0; i < argc; i++)
-      {
+      for (int i = 0; i < argc; i++) {
         delete[] argv[i];
       }
       delete[] argv;
@@ -74,13 +83,11 @@ int main(int argc, char *argv[])
     }
 
     // Check for --version argument
-    if (parser.getArgument("--version"))
-    {
+    if (parser.getArgument("--version")) {
       printVersion();
 #if defined(_WIN32)
       // Clean up allocated memory before returning
-      for (int i = 0; i < argc; i++)
-      {
+      for (int i = 0; i < argc; i++) {
         delete[] argv[i];
       }
       delete[] argv;
@@ -89,14 +96,12 @@ int main(int argc, char *argv[])
     }
 
     // Validate required arguments
-    if (!parser.isValid())
-    {
+    if (!parser.isValid()) {
       Fabric::Logger::logError(parser.getErrorMsg());
       printHelp();
 #if defined(_WIN32)
       // Clean up allocated memory before returning
-      for (int i = 0; i < argc; i++)
-      {
+      for (int i = 0; i < argc; i++) {
         delete[] argv[i];
       }
       delete[] argv;
@@ -110,14 +115,11 @@ int main(int argc, char *argv[])
     // w.set_html("Thanks for using webview!");
     w.navigate("https://youtube.com");
     w.run();
-  }
-  catch (const std::exception &e)
-  {
+  } catch (const std::exception &e) {
     std::cerr << "Fatal error: " << e.what() << '\n';
 #if defined(_WIN32)
     // Clean up allocated memory in case of exception
-    for (int i = 0; i < argc; i++)
-    {
+    for (int i = 0; i < argc; i++) {
       delete[] argv[i];
     }
     delete[] argv;
@@ -127,8 +129,7 @@ int main(int argc, char *argv[])
 
 #if defined(_WIN32)
   // Clean up allocated memory before exiting
-  for (int i = 0; i < argc; i++)
-  {
+  for (int i = 0; i < argc; i++) {
     delete[] argv[i];
   }
   delete[] argv;
