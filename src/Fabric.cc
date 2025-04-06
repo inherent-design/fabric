@@ -5,11 +5,13 @@
 #include "webview/webview.h"
 #include <iostream>
 
-void printVersion() {
+void printVersion()
+{
   std::cout << APP_NAME << " v" << APP_VERSION << std::endl;
 }
 
-void printHelp() {
+void printHelp()
+{
   printVersion();
   std::cout << "Usage: " << APP_EXECUTABLE_NAME << " [options]\n"
             << "Options:\n"
@@ -22,14 +24,16 @@ void printHelp() {
 #include <windows.h>
 
 int WINAPI WinMain(HINSTANCE /*hInst*/, HINSTANCE /*hPrevInst*/,
-                   LPSTR /*lpCmdLine*/, int /*nCmdShow*/) {
+                   PSTR lpCmdLine, int /*nCmdShow*/)
+{
   // Get command line arguments on Windows
   int argc = 0;
   LPWSTR *argvW = CommandLineToArgvW(GetCommandLineW(), &argc);
 
   // Convert wide strings to regular strings
   char **argv = new char *[argc];
-  for (int i = 0; i < argc; i++) {
+  for (int i = 0; i < argc; i++)
+  {
     int size = WideCharToMultiByte(CP_UTF8, 0, argvW[i], -1, nullptr, 0,
                                    nullptr, nullptr);
     argv[i] = new char[size];
@@ -37,30 +41,31 @@ int WINAPI WinMain(HINSTANCE /*hInst*/, HINSTANCE /*hPrevInst*/,
                         nullptr);
   }
   LocalFree(argvW);
+
 #else
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
 #endif
-  try {
-    ArgumentParserBuilder parserBuilder;
-    ArgumentParser parser;
-    parserBuilder.addOption("--version", TokenType::LiteralString, true)
-        .addOption("--help", TokenType::LiteralString, true);
+  try
+  {
+    Fabric::ArgumentParserBuilder parserBuilder;
+    Fabric::ArgumentParser parser;
+    parserBuilder.addOption("--version", Fabric::TokenType::LiteralString, true)
+        .addOption("--help", Fabric::TokenType::LiteralString, true);
     parser = parserBuilder.build();
 
-#if defined(_WIN32)
-    bool debug = false;
-#else
     bool debug = true;
-#endif
 
     parser.parse(argc, argv);
 
     // Check for --help argument
-    if (parser.getArgument("--help")) {
+    if (parser.getArgument("--help"))
+    {
       printHelp();
 #if defined(_WIN32)
       // Clean up allocated memory before returning
-      for (int i = 0; i < argc; i++) {
+      for (int i = 0; i < argc; i++)
+      {
         delete[] argv[i];
       }
       delete[] argv;
@@ -69,11 +74,13 @@ int main(int argc, char *argv[]) {
     }
 
     // Check for --version argument
-    if (parser.getArgument("--version")) {
+    if (parser.getArgument("--version"))
+    {
       printVersion();
 #if defined(_WIN32)
       // Clean up allocated memory before returning
-      for (int i = 0; i < argc; i++) {
+      for (int i = 0; i < argc; i++)
+      {
         delete[] argv[i];
       }
       delete[] argv;
@@ -82,12 +89,14 @@ int main(int argc, char *argv[]) {
     }
 
     // Validate required arguments
-    if (!parser.isValid()) {
-      Logger::logError(parser.getErrorMsg());
+    if (!parser.isValid())
+    {
+      Fabric::Logger::logError(parser.getErrorMsg());
       printHelp();
 #if defined(_WIN32)
       // Clean up allocated memory before returning
-      for (int i = 0; i < argc; i++) {
+      for (int i = 0; i < argc; i++)
+      {
         delete[] argv[i];
       }
       delete[] argv;
@@ -98,13 +107,17 @@ int main(int argc, char *argv[]) {
     webview::webview w(debug, nullptr);
     w.set_title("Fabric Engine Example");
     w.set_size(480, 320, WEBVIEW_HINT_NONE);
-    w.set_html("Thanks for using webview!");
+    // w.set_html("Thanks for using webview!");
+    w.navigate("https://youtube.com");
     w.run();
-  } catch (const std::exception &e) {
+  }
+  catch (const std::exception &e)
+  {
     std::cerr << "Fatal error: " << e.what() << '\n';
 #if defined(_WIN32)
     // Clean up allocated memory in case of exception
-    for (int i = 0; i < argc; i++) {
+    for (int i = 0; i < argc; i++)
+    {
       delete[] argv[i];
     }
     delete[] argv;
@@ -114,7 +127,8 @@ int main(int argc, char *argv[]) {
 
 #if defined(_WIN32)
   // Clean up allocated memory before exiting
-  for (int i = 0; i < argc; i++) {
+  for (int i = 0; i < argc; i++)
+  {
     delete[] argv[i];
   }
   delete[] argv;

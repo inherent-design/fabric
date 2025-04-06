@@ -3,228 +3,234 @@
 #include <string>
 #include <variant>
 
-typedef std::variant<std::nullptr_t, bool, int, double, std::string> Variant;
+namespace Fabric
+{
 
-// Enum for token types with payloads for literals
-enum class TokenType {
-  // CLI
-  CLIFlag,       // --flag (valueless flag)
-  CLIOption,     // --option=value or --option value
-  CLIPositional, // positional argument
-  CLICommand,    // command in command-based CLIs
+  typedef std::variant<std::nullptr_t, bool, int, double, std::string> Variant;
 
-  // Control Flow
-  KeywordIf,       // if
-  KeywordElse,     // else
-  KeywordFor,      // for
-  KeywordWhile,    // while
-  KeywordReturn,   // return
-  KeywordGoto,     // goto
-  KeywordBreak,    // break
-  KeywordContinue, // continue
-  KeywordSwitch,   // switch
-  KeywordCase,     // case
-  KeywordDefault,  // default
-  KeywordDefer,    // defer (Go-like)
+  // Enum for token types with payloads for literals
+  enum class TokenType
+  {
+    // CLI
+    CLIFlag,       // --flag (valueless flag)
+    CLIOption,     // --option=value or --option value
+    CLIPositional, // positional argument
+    CLICommand,    // command in command-based CLIs
 
-  // Error Handling
-  KeywordTry,     // try
-  KeywordCatch,   // catch
-  KeywordThrow,   // throw
-  KeywordFinally, // finally
-  KeywordRaise,   // raise
-  KeywordAssert,  // assert
+    // Control Flow
+    KeywordIf,       // if
+    KeywordElse,     // else
+    KeywordFor,      // for
+    KeywordWhile,    // while
+    KeywordReturn,   // return
+    KeywordGoto,     // goto
+    KeywordBreak,    // break
+    KeywordContinue, // continue
+    KeywordSwitch,   // switch
+    KeywordCase,     // case
+    KeywordDefault,  // default
+    KeywordDefer,    // defer (Go-like)
 
-  // Data Types
-  KeywordFunction, // func, def, fn, function
-  KeywordStruct,   // struct
-  KeywordEnum,     // enum
-  KeywordArray,    // array
-  KeywordMap,      // map, dict
-  KeywordSet,      // set
-  KeywordTuple,    // tuple
-  KeywordGeneric,  // generic, template
-  KeywordWhere,    // where (constraints)
+    // Error Handling
+    KeywordTry,     // try
+    KeywordCatch,   // catch
+    KeywordThrow,   // throw
+    KeywordFinally, // finally
+    KeywordRaise,   // raise
+    KeywordAssert,  // assert
 
-  // Object-Oriented Inheritance
-  KeywordClass,      // class
-  KeywordInterface,  // interface
-  KeywordImplements, // implements
-  KeywordExtends,    // extends
-  KeywordSelf,       // self
-  KeywordSuper,      // super
-  KeywordOverride,   // override
-  KeywordAbstract,   // abstract
-  KeywordVirtual,    // virtual
-  KeywordDelegate,   // delegate
-  KeywordEvent,      // event
+    // Data Types
+    KeywordFunction, // func, def, fn, function
+    KeywordStruct,   // struct
+    KeywordEnum,     // enum
+    KeywordArray,    // array
+    KeywordMap,      // map, dict
+    KeywordSet,      // set
+    KeywordTuple,    // tuple
+    KeywordGeneric,  // generic, template
+    KeywordWhere,    // where (constraints)
 
-  // Modules
-  KeywordImport,  // import, include, use
-  KeywordPackage, // package, module, namespace
-  KeywordExport,  // export
-  KeywordFrom,    // from
+    // Object-Oriented Inheritance
+    KeywordClass,      // class
+    KeywordInterface,  // interface
+    KeywordImplements, // implements
+    KeywordExtends,    // extends
+    KeywordSelf,       // self
+    KeywordSuper,      // super
+    KeywordOverride,   // override
+    KeywordAbstract,   // abstract
+    KeywordVirtual,    // virtual
+    KeywordDelegate,   // delegate
+    KeywordEvent,      // event
 
-  // Declarations
-  KeywordConst,  // const
-  KeywordLet,    // let
-  KeywordVar,    // var
-  KeywordType,   // type
-  KeywordMut,    // mut
-  KeywordUnsafe, // unsafe
-  KeywordStatic, // static
+    // Modules
+    KeywordImport,  // import, include, use
+    KeywordPackage, // package, module, namespace
+    KeywordExport,  // export
+    KeywordFrom,    // from
 
-  // Memory Management
-  KeywordNew,    // new
-  KeywordDelete, // delete
-  KeywordAlloc,  // alloc
-  KeywordFree,   // free
-  KeywordMove,   // move
-  KeywordBorrow, // borrow (Rust-like)
+    // Declarations
+    KeywordConst,  // const
+    KeywordLet,    // let
+    KeywordVar,    // var
+    KeywordType,   // type
+    KeywordMut,    // mut
+    KeywordUnsafe, // unsafe
+    KeywordStatic, // static
 
-  // Access Modifiers
-  KeywordPublic,    // pub
-  KeywordPrivate,   // priv
-  KeywordProtected, // prot
-  KeywordInternal,  // int
-  KeywordFinal,     // final
+    // Memory Management
+    KeywordNew,    // new
+    KeywordDelete, // delete
+    KeywordAlloc,  // alloc
+    KeywordFree,   // free
+    KeywordMove,   // move
+    KeywordBorrow, // borrow (Rust-like)
 
-  // Boolean Operators
-  KeywordAs,  // as
-  KeywordIs,  // is
-  KeywordIn,  // in
-  KeywordNot, // not
-  KeywordAnd, // and
-  KeywordOr,  // or
+    // Access Modifiers
+    KeywordPublic,    // pub
+    KeywordPrivate,   // priv
+    KeywordProtected, // prot
+    KeywordInternal,  // int
+    KeywordFinal,     // final
 
-  // Functional Programming
-  KeywordLambda,  // lambda, =>
-  KeywordClosure, // closure
-  KeywordCurry,   // curry
-  KeywordPipe,    // pipe, |>
-  KeywordCompose, // compose
+    // Boolean Operators
+    KeywordAs,  // as
+    KeywordIs,  // is
+    KeywordIn,  // in
+    KeywordNot, // not
+    KeywordAnd, // and
+    KeywordOr,  // or
 
-  // Concurrency
-  KeywordThread, // thread
-  KeywordAtomic, // atomic
-  KeywordSync,   // sync
-  KeywordLock,   // lock
-  KeywordMutex,  // mutex
+    // Functional Programming
+    KeywordLambda,  // lambda, =>
+    KeywordClosure, // closure
+    KeywordCurry,   // curry
+    KeywordPipe,    // pipe, |>
+    KeywordCompose, // compose
 
-  // Async
-  KeywordYield, // yield
-  KeywordAsync, // async
-  KeywordAwait, // await
+    // Concurrency
+    KeywordThread, // thread
+    KeywordAtomic, // atomic
+    KeywordSync,   // sync
+    KeywordLock,   // lock
+    KeywordMutex,  // mutex
 
-  // Operators
-  OperatorPlus,             // +
-  OperatorMinus,            // -
-  OperatorMultiply,         // *
-  OperatorDivide,           // /
-  OperatorModulo,           // %
-  OperatorAssign,           // =
-  OperatorEqual,            // ==
-  OperatorNotEqual,         // !=, <>
-  OperatorLessThan,         // <
-  OperatorGreaterThan,      // >
-  OperatorLessEqual,        // <=
-  OperatorGreaterEqual,     // >=
-  OperatorPower,            // **
-  OperatorBitwiseAnd,       // &
-  OperatorBitwiseOr,        // |
-  OperatorBitwiseXor,       // ^
-  OperatorBitwiseNot,       // ~
-  OperatorShiftLeft,        // <<
-  OperatorShiftRight,       // >>
-  OperatorAssignAdd,        // +=
-  OperatorAssignSubtract,   // -=
-  OperatorAssignMultiply,   // *=
-  OperatorAssignDivide,     // /=
-  OperatorAssignModulo,     // %=
-  OperatorAssignBitwiseAnd, // &=
-  OperatorAssignBitwiseOr,  // |=
-  OperatorAssignBitwiseXor, // ^=
-  OperatorAssignBitwiseNot, // ~=
-  OperatorAssignShiftLeft,  // <<=
-  OperatorAssignShiftRight, // >>=
-  OperatorAssignPower,      // **=
-  OperatorIncrement,        // ++
-  OperatorDecrement,        // --
-  OperatorNullCoalesce,     // ??
-  OperatorOptionalChaining, // ?.
-  OperatorSpread,           // ...
-  OperatorRangeInclusive,   // ..=
-  OperatorRangeExclusive,   // ..
-  OperatorPipeline,         // |>
+    // Async
+    KeywordYield, // yield
+    KeywordAsync, // async
+    KeywordAwait, // await
 
-  // Delimiters
-  DelimiterSemicolon,    // ;
-  DelimiterComma,        // ,
-  DelimiterDot,          // .
-  DelimiterColon,        // :
-  DelimiterOpenParen,    // (
-  DelimiterCloseParen,   // )
-  DelimiterOpenBrace,    // {
-  DelimiterCloseBrace,   // }
-  DelimiterOpenBracket,  // [
-  DelimiterCloseBracket, // ]
-  DelimiterDoubleColon,  // ::
-  DelimiterArrow,        // ->
-  DelimiterFatArrow,     // =>
-  DelimiterBacktick,     // `
+    // Operators
+    OperatorPlus,             // +
+    OperatorMinus,            // -
+    OperatorMultiply,         // *
+    OperatorDivide,           // /
+    OperatorModulo,           // %
+    OperatorAssign,           // =
+    OperatorEqual,            // ==
+    OperatorNotEqual,         // !=, <>
+    OperatorLessThan,         // <
+    OperatorGreaterThan,      // >
+    OperatorLessEqual,        // <=
+    OperatorGreaterEqual,     // >=
+    OperatorPower,            // **
+    OperatorBitwiseAnd,       // &
+    OperatorBitwiseOr,        // |
+    OperatorBitwiseXor,       // ^
+    OperatorBitwiseNot,       // ~
+    OperatorShiftLeft,        // <<
+    OperatorShiftRight,       // >>
+    OperatorAssignAdd,        // +=
+    OperatorAssignSubtract,   // -=
+    OperatorAssignMultiply,   // *=
+    OperatorAssignDivide,     // /=
+    OperatorAssignModulo,     // %=
+    OperatorAssignBitwiseAnd, // &=
+    OperatorAssignBitwiseOr,  // |=
+    OperatorAssignBitwiseXor, // ^=
+    OperatorAssignBitwiseNot, // ~=
+    OperatorAssignShiftLeft,  // <<=
+    OperatorAssignShiftRight, // >>=
+    OperatorAssignPower,      // **=
+    OperatorIncrement,        // ++
+    OperatorDecrement,        // --
+    OperatorNullCoalesce,     // ??
+    OperatorOptionalChaining, // ?.
+    OperatorSpread,           // ...
+    OperatorRangeInclusive,   // ..=
+    OperatorRangeExclusive,   // ..
+    OperatorPipeline,         // |>
 
-  // Literals
-  LiteralNull,     // null, nil, None
-  LiteralNumber,   // num(42)
-  LiteralString,   // str("hello")
-  LiteralBoolean,  // bool(true)
-  LiteralFloat,    // float(3.14)
-  LiteralChar,     // char('a')
-  LiteralRegex,    // regex(/pattern/)
-  LiteralDate,     // date(2023-01-01)
-  LiteralTemplate, // template(`string ${expr}`)
-  LiteralBinary,   // binary(0b101)
-  LiteralHex,      // hex(0xFF)
-  LiteralOctal,    // octal(0o77)
-  LiteralBigInt,   // bigint(1234567890123456789n)
+    // Delimiters
+    DelimiterSemicolon,    // ;
+    DelimiterComma,        // ,
+    DelimiterDot,          // .
+    DelimiterColon,        // :
+    DelimiterOpenParen,    // (
+    DelimiterCloseParen,   // )
+    DelimiterOpenBrace,    // {
+    DelimiterCloseBrace,   // }
+    DelimiterOpenBracket,  // [
+    DelimiterCloseBracket, // ]
+    DelimiterDoubleColon,  // ::
+    DelimiterArrow,        // ->
+    DelimiterFatArrow,     // =>
+    DelimiterBacktick,     // `
 
-  // Preprocessor
-  PreprocessorInclude, // #include
-  PreprocessorDefine,  // #define
-  PreprocessorIf,      // #if
-  PreprocessorElse,    // #else
-  PreprocessorEndif,   // #endif
+    // Literals
+    LiteralNull,     // null, nil, None
+    LiteralNumber,   // num(42)
+    LiteralString,   // str("hello")
+    LiteralBoolean,  // bool(true)
+    LiteralFloat,    // float(3.14)
+    LiteralChar,     // char('a')
+    LiteralRegex,    // regex(/pattern/)
+    LiteralDate,     // date(2023-01-01)
+    LiteralTemplate, // template(`string ${expr}`)
+    LiteralBinary,   // binary(0b101)
+    LiteralHex,      // hex(0xFF)
+    LiteralOctal,    // octal(0o77)
+    LiteralBigInt,   // bigint(1234567890123456789n)
 
-  // Meta-programming
-  MetaQuote,   // quote
-  MetaUnquote, // unquote
-  MetaSplice,  // splice
-  MetaMacro,   // macro
+    // Preprocessor
+    PreprocessorInclude, // #include
+    PreprocessorDefine,  // #define
+    PreprocessorIf,      // #if
+    PreprocessorElse,    // #else
+    PreprocessorEndif,   // #endif
 
-  // Identifiers
-  Identifier,
+    // Meta-programming
+    MetaQuote,   // quote
+    MetaUnquote, // unquote
+    MetaSplice,  // splice
+    MetaMacro,   // macro
 
-  // Comments
-  CommentLine,  // //, #
-  CommentBlock, // /* */
+    // Identifiers
+    Identifier,
 
-  // Whitespace
-  Whitespace,
-  Newline,
-  Tab,
-  CarriageReturn,
-  Space,
+    // Comments
+    CommentLine,  // //, #
+    CommentBlock, // /* */
 
-  // End of File
-  EndOfFile,
-};
+    // Whitespace
+    Whitespace,
+    Newline,
+    Tab,
+    CarriageReturn,
+    Space,
 
-// Token structure with type and value
-struct Token {
-  TokenType type;
-  Variant value;
+    // End of File
+    EndOfFile,
+  };
 
-  Token(TokenType type, Variant value = nullptr) : type(type), value(value) {}
+  // Token structure with type and value
+  struct Token
+  {
+    TokenType type;
+    Variant value;
 
-  Token() : type(TokenType::EndOfFile), value(nullptr) {}
-};
+    Token(TokenType type, Variant value = nullptr) : type(type), value(value) {}
+
+    Token() : type(TokenType::EndOfFile), value(nullptr) {}
+  };
+}

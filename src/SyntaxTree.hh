@@ -4,23 +4,28 @@
 #include <memory>
 #include <vector>
 
-// Represents a node in the abstract syntax tree
-class ASTNode {
-public:
-  ASTNode(const Token &token);
+namespace Fabric
+{
 
-  // Getters
-  const Token &getToken() const;
-  const std::vector<std::shared_ptr<ASTNode>> &getChildren() const;
+  // Represents a node in the abstract syntax tree
+  class ASTNode
+  {
+  public:
+    ASTNode(const Token &token);
 
-  void addChild(std::shared_ptr<ASTNode> child);
+    // Getters
+    const Token &getToken() const;
+    const std::vector<std::shared_ptr<ASTNode>> &getChildren() const;
 
-private:
-  Token token;
-  std::vector<std::shared_ptr<ASTNode>> children;
-};
+    void addChild(std::shared_ptr<ASTNode> child);
 
-// Helper functions
-TokenType determineTokenType(const std::string &token);
+  private:
+    Token token;
+    std::vector<std::shared_ptr<ASTNode>> children;
+  };
 
-Variant parseValue(const std::string &token, TokenType type);
+  // Helper functions
+  TokenType determineTokenType(const std::string &token);
+
+  Variant parseValue(const std::string &token, TokenType type);
+}
