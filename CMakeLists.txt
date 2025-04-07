@@ -1,6 +1,6 @@
 # Fabric Engine - CMake Build Configuration
 # Minimum required CMake version
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 4.0)
 
 # Project definition
 project(fabric

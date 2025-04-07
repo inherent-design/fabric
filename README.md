@@ -86,7 +86,7 @@ Fabric Engine is built with a modular architecture:
 
 ### Prerequisites
 
-- CMake 3.16 or higher
+- CMake 4.0 or higher
 - C++20 compatible compiler
 - Platform-specific development tools:
   - Windows: Visual Studio with C++ workload
