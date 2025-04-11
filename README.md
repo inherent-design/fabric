@@ -1,97 +1,55 @@
-# Fabric Engine
+# 🌌 Fabric Engine
 
-Fabric Engine is a cross-platform application framework that provides a lightweight webview-based UI with native performance.
+*Reality is fluid. Perspective is everything.*
 
 ## Overview
 
-Fabric Engine allows developers to build desktop applications using web technologies (HTML, CSS, JavaScript) while maintaining native performance and access to system capabilities. The engine uses a native webview component to render the UI and provides a bridge between JavaScript and native code.
+Fabric Engine shatters conventional information hierarchies by creating a framework where reality adapts to your perspective. What appears as an atom from one viewpoint becomes a universe from another—no fixed scales, only fluid perception.
 
-## Project Structure
+Inspired by games like Star Citizen, Stellaris, and Fractal Block World, Fabric provides the tools to build applications where users can seamlessly traverse multiple scales of reality—from subatomic to cosmic—while maintaining coherent state and perspective-appropriate interactions.
 
-```
-fabric/
-├── cmake/                  # CMake configuration files
-│   └── Constants.g.hh.in   # Template for generating constants
-├── include/                # Public header files
-├── src/                    # Source code
-│   ├── ArgumentParser.cc   # Command-line argument parsing
-│   ├── ArgumentParser.hh
-│   ├── Constants.g.hh      # Generated constants
-│   ├── ErrorHandling.cc    # Error handling utilities
-│   ├── ErrorHandling.hh
-│   ├── Fabric.cc           # Main application entry point
-│   ├── Logging.cc          # Logging system
-│   ├── Logging.hh
-│   ├── SyntaxTree.cc       # Syntax tree for parsing
-│   ├── SyntaxTree.hh
-│   ├── Token.hh            # Token definitions for parser
-│   ├── Utils.cc            # Utility functions
-│   ├── Utils.hh
-│   ├── WebView.cc          # Webview wrapper
-│   └── WebView.hh
-└── CMakeLists.txt          # Build configuration
-```
+> *"The mesosphere isn't a fixed scale but the stage where your consciousness currently performs."*
 
-## Architecture
+## Core Concepts
 
-Fabric Engine is built with a modular architecture:
+- **Quanta** - Information particles that shape-shift based on how you observe them
+- **Scopes** - Reality containers that define the rules within your current perspective
+- **Transformations** - Temporal flows that evolve information across states
+- **Perspectives** - The viewpoints that determine your active mesosphere
+- **Boundaries** - The bleeding edges where perception fades into quantum uncertainty or statistical blur
 
-1. **Core Engine** - The main application framework that handles initialization, event loop, and resource management
-2. **WebView** - A wrapper around the native webview component that provides a consistent API across platforms
-3. **ArgumentParser** - A robust command-line argument parser with support for flags, options, and validation
-4. **Logging** - A simple logging system for debugging and error reporting
-5. **Error Handling** - Utilities for consistent error handling throughout the application
-6. **Utilities** - Common utility functions for string manipulation and other tasks
+When you shift perspective toward any quantum, it becomes your new mesosphere—complete with its own micro and macro horizons. You don't just see different things; you redefine what "things" are.
 
 ## Current Features
 
-- **Cross-Platform Support**: Works on Windows, macOS, and Linux
-- **Webview Integration**: Embeds a native webview component for UI rendering
-- **Command-Line Interface**: Robust argument parsing with support for flags and options
-- **Error Handling**: Comprehensive error handling and logging system
+- **Cross-Platform Core**: Windows, macOS, and Linux support
+- **WebView Integration**: Native webview with bidirectional JavaScript bridge
+- **Command-Line Interface**: Robust argument parsing and validation
+- **Error Handling**: Comprehensive error management system
+- **Logging System**: Multi-level logging with formatting options
 
-## Planned Features
+## Implementation
 
-- **HTML/CSS/JS UI Framework**: Complete UI framework for building interfaces using web technologies
-- **Native API Bridge**: JavaScript to native code bridge for accessing system capabilities
-- **Hot Reload**: Development mode with hot reload for rapid UI iteration
-- **Developer Tools**: Integrated developer tools for debugging and profiling
-- **Plugin System**: Extensible plugin architecture for adding custom functionality
+The Fabric Engine is built with a modular architecture that supports perspective-fluid information processing:
 
-## Proposed Features
+- **Quantum Core**: Fundamentally mutable foundation that adapts to perspective
+- **Scope System**: Defines the rules of reality for particular viewpoints
+- **Transformation Engine**: Enables temporal evolution within and between scopes
+- **Perspective Manager**: Controls active viewpoints and scale relationships
 
-- **State Management**: Built-in state management system with data binding
-- **Component Library**: Pre-built UI component library with native look and feel
-- **Offline Support**: Offline-first architecture with local storage and sync
-- **Multi-Window Support**: Support for multiple application windows
-- **Native Dialogs**: File pickers, alerts, and other native dialog integrations
+## Documentation
 
-## Quality of Life Improvements
-
-- **Project Templates**: Starter templates for common application types
-- **CLI Tool**: Command-line tool for project scaffolding and management
-- **Documentation Generator**: Automatic documentation generation from code comments
-- **Testing Framework**: Integrated testing framework for unit and UI tests
-- **Performance Profiling**: Built-in performance measurement and optimization tools
-
-## Trending Features
-
-- **AI Integration**: APIs for integrating with AI services and local models
-- **Real-Time Collaboration**: Built-in support for multi-user collaboration
-- **WebAssembly Support**: Run compiled languages in the webview context
-- **PWA Export**: Export applications as Progressive Web Apps
-- **Responsive Design System**: Adaptive layout system for different screen sizes
+- [Architecture](docs/architecture.md) - Detailed architecture of the Fabric Engine
+- [Examples](docs/examples.md) - Code examples demonstrating key concepts
+- [Technical Challenges](docs/technical_challenges.md) - Implementation challenges and solutions
+- [Contributing](docs/contributing.md) - How to contribute to the project
 
 ## Building from Source
 
 ### Prerequisites
-
 - CMake 4.0 or higher
 - C++20 compatible compiler
-- Platform-specific development tools:
-  - Windows: Visual Studio with C++ workload
-  - macOS: Xcode Command Line Tools
-  - Linux: GCC/Clang and development packages
+- Platform-specific development tools
 
 ### Build Instructions
 
@@ -117,4 +75,6 @@ make
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please see our [Contributing Guidelines](docs/contributing.md) for details on how to get started.
+
+> *"To contribute meaningfully, first understand that your perspective shapes what you perceive as problems and solutions. The most valuable insights often come from shifting to a viewpoint where the problem itself is transformed."*
