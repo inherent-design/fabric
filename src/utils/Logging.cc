@@ -1,4 +1,4 @@
-#include "Logging.hh"
+#include "fabric/utils/Logging.hh"
 #include <chrono>
 #include <iomanip>
 #include <iostream>
@@ -8,6 +8,15 @@ namespace Fabric {
 // Initialize static members
 LogLevel Logger::currentLogLevel = LogLevel::Info;
 bool Logger::includeTimestamps = true;
+
+void Logger::initialize() {
+  // Set default values
+  currentLogLevel = LogLevel::Info;
+  includeTimestamps = true;
+
+  // Log startup message
+  logInfo("Logger initialized");
+}
 
 void Logger::setLogLevel(LogLevel level) { currentLogLevel = level; }
 

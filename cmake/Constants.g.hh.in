@@ -1,12 +1,11 @@
-#ifndef CONSTANTS_G_H
-#define CONSTANTS_G_H
+#pragma once
 
-#define APP_NAME "@APP_NAME@"
+namespace Fabric {
+    constexpr const char* APP_NAME = "@APP_NAME@";
 #if defined(_WIN32)
-#define APP_EXECUTABLE_NAME "@APP_NAME@.exe"
+    constexpr const char* APP_EXECUTABLE_NAME = "@APP_NAME@.exe";
 #else
-#define APP_EXECUTABLE_NAME "@APP_NAME@"
+    constexpr const char* APP_EXECUTABLE_NAME = "@APP_NAME@";
 #endif
-#define APP_VERSION "@APP_VERSION@"
-
-#endif // CONSTANTS_G_H
+    constexpr const char* APP_VERSION = "@APP_VERSION@";
+}

@@ -1,124 +1,174 @@
 # Fabric Engine Architecture
 
-This document outlines the architecture of Fabric Engine's perspective-fluid framework.
+## Overview
 
-## Core Concepts
+Fabric is a modern C++20 cross-platform framework for building applications with an embedded web UI. It combines native C++ performance with the flexibility of HTML/CSS/JavaScript for the user interface.
 
-### Perspective-Relative Architecture
+## Project Structure
 
-- **Quanta** - Information particles whose nature and complexity shift depending on perspective
-- **Scopes** - Processing contexts that define the rules of reality for a particular viewpoint
-- **Transformations** - Temporal operations that evolve information across states
-- **Perspectives** - Observation points that determine which scale appears as the active mesosphere
-- **Scale Boundaries** - The microscope and macroscope limits beyond which current reality fades
-- **Persistence** - Coherent state maintained across all scales of observation
-
-When you shift perspective toward any quantum, it becomes your new mesosphere—complete with its own micro and macro horizons. You don't just see different things; you redefine what "things" are.
-
-### Scale Fluidity
-
-Fabric organizes information across relative scales:
-
-- **Microscope** - The lower boundary of perception, where details fade into quantum uncertainty
-- **Mesosphere** - The active perceptual field where information is most accessible and manipulable
-- **Macroscope** - The upper boundary of comprehension, where complexity fades into statistical patterns
-
-## System Architecture
-
-### Quantum Core
-
-The Quantum Core is the foundation of Fabric's architecture:
-
-- **Quantum Base** - The fundamentally mutable foundation that adapts to perspective
-- **Scope System** - Defines the rules of reality for a particular viewpoint
-- **Transformation Engine** - Enables temporal evolution within and between scopes
-- **Perspective Manager** - Controls the active viewpoint and scale relationships
-- **Boundary System** - Manages the transition between microscope and macroscope limits
-- **Entity Component System** - Scale-adaptive component architecture for modular functionality
-
-### Practical Systems
-
-Fabric implements several practical systems to manage perspective shifting:
-
-- **Procedural Generation** - Creates coherent content across scales with appropriate detail levels
-- **Level of Detail Management** - Dynamically adjusts detail based on perspective
-- **Physics Simulation** - Different physics rules apply at different scales (quantum/molecular/cosmic)
-- **Persistent State** - Ensures changes at one scale propagate appropriately to others
-- **Resource Management** - Optimizes memory and processing by focusing on mesosphere details
-
-### WebView Integration
-
-The WebView component provides visualization and interaction:
-
-- **Perspective Visualization** - DOM-based rendering that adapts to current viewpoint
-- **Interactive Reality** - Interfaces for manipulating information within the current mesosphere
-- **Bridge System** - Bidirectional communication between quantum core and observation layer
-- **Adaptive Controls** - UI elements that change function based on the current scale
-
-## Class Hierarchy
+The project follows a modular architecture organized into logical components:
 
 ```
-Quantum (Base class for all information particles)
-├── Property<T> (Type-safe property with perspective-dependent behavior)
-├── Perspective (Defines viewpoint and scale)
-├── Scope (Reality container with processing rules)
-│   └── MesosphericScope (Active perception field)
-│   └── BoundaryScope (Transition between perception fields)
-├── Transformation (Operations that evolve quanta across time)
-├── Beholder (Observer with perspective capabilities)
-└── SpatialIndex (Efficient spatial lookup structure)
+fabric/
+├── CMakeLists.txt          # Main build configuration
+├── README.md               # Project overview
+├── cmake/                  # CMake modules and configuration
+│   ├── Constants.g.hh.in   # Template for constants generation
+│   └── modules/            # Custom CMake modules
+│       └── GoogleTest.cmake # Google Test integration
+├── docs/                   # Documentation
+│   └── ARCHITECTURE.md     # This document
+├── include/                # Public API headers
+│   └── fabric/             # Main include directory
+│       ├── core/           # Core framework components
+│       │   └── Constants.g.hh # Generated constants
+│       ├── parser/         # Command line and syntax parsing
+│       │   ├── ArgumentParser.hh
+│       │   ├── SyntaxTree.hh
+│       │   └── Token.hh
+│       ├── ui/             # User interface components
+│       │   └── WebView.hh
+│       └── utils/          # Utility functions and classes
+│           ├── ErrorHandling.hh
+│           ├── Logging.hh
+│           └── Utils.hh
+├── src/                    # Implementation files
+│   ├── core/               # Core implementation
+│   │   └── Fabric.cc       # Application entry point
+│   ├── parser/             # Parser implementations
+│   │   ├── ArgumentParser.cc
+│   │   └── SyntaxTree.cc
+│   ├── ui/                 # UI implementations
+│   │   └── WebView.cc
+│   └── utils/              # Utilities implementations
+│       ├── ErrorHandling.cc
+│       ├── Logging.cc
+│       └── Utils.cc
+└── tests/                  # Test suite
+    ├── e2e/                # End-to-end tests
+    │   └── FabricE2ETest.cc
+    ├── integration/        # Integration tests
+    │   └── ParserLoggingIntegrationTest.cc
+    └── unit/               # Unit tests
+        ├── parser/         # Parser unit tests
+        │   └── ArgumentParserTest.cc
+        ├── ui/             # UI unit tests
+        │   └── WebViewTest.cc
+        └── utils/          # Utilities unit tests
+            ├── ErrorHandlingTest.cc
+            ├── LoggingTest.cc
+            └── UtilsTest.cc
 ```
 
-## Component Interactions
+## Component Design
 
-### Perspective Shifting Process
+### Core Components
 
-1. **Initiation**: A Beholder decides to shift perspective to a new quantum
-2. **Pre-loading**: The system identifies and preloads quanta that will be in the new perspective
-3. **Transformation**: The perspective transition occurs, potentially with visual effects
-4. **Boundary Update**: New microscope and macroscope boundaries are established
-5. **Cleanup**: Resources from the previous perspective are marked for potential cleanup
-6. **Interaction**: The Beholder can now interact with quanta in the new mesosphere
+The core components provide the application framework and entry point:
 
-### Property Access and Modification
+- **Fabric.cc**: Application entry point that initializes subsystems and handles the main event loop.
+- **Constants.g.hh**: Generated constants used throughout the application.
 
-1. **Request**: A Beholder requests a property of a quantum
-2. **Perspective Check**: The system determines how the property appears from the Beholder's perspective
-3. **Transformation**: The property data is transformed according to perspective rules
-4. **Presentation**: The appropriately transformed property is returned to the Beholder
-5. **Modification**: If the Beholder modifies the property, changes propagate according to defined rules
+### Parser Components
 
-### Event Propagation
+The parser system handles command-line arguments and syntax parsing:
 
-1. **Event Creation**: An event occurs on a quantum
-2. **Local Notification**: Observers directly watching the quantum are notified
-3. **Upward Propagation**: The event potentially bubbles up through parent scopes
-4. **Downward Propagation**: The event potentially propagates down to child quanta
-5. **Transformation**: Events may transform as they cross scale boundaries
-6. **Observation**: Different observers may perceive the same event differently based on their perspective
+- **ArgumentParser**: Processes command-line arguments using a builder pattern for configuration.
+- **SyntaxTree**: Handles parsing of structured data.
+- **Token**: Defines the token system for lexical analysis with an extensive type system.
 
-## Implementation Details
+### UI Components
 
-### Memory Management Strategy
+The UI system provides a web-based user interface:
 
-- **Object Pools**: Frequently created and destroyed objects use memory pools
-- **Reference Counting**: Shared pointers track quantum usage across scopes
-- **Lazy Loading**: Detailed properties loaded only when needed
-- **Garbage Collection**: Automatic cleanup of out-of-scope quanta
-- **Memory Budgets**: Strict budgets for different quantum types based on importance
+- **WebView**: Embeds a web browser view for rendering HTML/CSS/JavaScript interfaces.
 
-### Multi-threading Approach
+### Utility Components
 
-- **Worker Pools**: Thread pools handle resource loading/unloading
-- **Task-Based Parallelism**: Operations decomposed into independent tasks
-- **Lock-Free Algorithms**: Atomic operations used for performance-critical sections
-- **Job System**: Priority-based job scheduling for background work
-- **Thread Safety**: Thread-safe scope transitions and quantum updates
+Utility components provide common functionality used throughout the application:
 
-### Rendering Pipeline
+- **Logging**: Configurable logging system with multiple severity levels.
+- **ErrorHandling**: Exception handling and error reporting.
+- **Utils**: General utility functions for string manipulation, file operations, etc.
 
-- **Adaptive LOD**: Level of detail adjusted based on perspective
-- **Detail Transitions**: Smooth blending between LOD levels
-- **Coordinate Systems**: Local coordinates relative to current perspective center
-- **Floating Point Precision**: Double precision for core positioning calculations
-- **Streaming Architecture**: Asynchronous loading of detailed assets as perspective shifts
+## Build System
+
+Fabric uses CMake (4.0+) as its build system with the following features:
+
+- **Static Library**: Core functionality is built as a static library (`FabricLib`)
+- **Executable**: Main application built on top of the library
+- **Dependencies**:
+  - SDL3: For cross-platform window management, input handling, and multimedia
+  - Webview: For embedding a web browser component
+  - Google Test: For unit and integration testing
+
+## Testing Architecture
+
+The testing system is organized into three layers:
+
+### Unit Tests
+
+Unit tests focus on testing individual components in isolation:
+
+- **ArgumentParserTest**: Tests CLI argument parsing functionality
+- **WebViewTest**: Tests UI webview functionality
+- **LoggingTest**: Tests logging system
+- **ErrorHandlingTest**: Tests error handling
+- **UtilsTest**: Tests utility functions
+
+### Integration Tests
+
+Integration tests verify the interaction between multiple components:
+
+- **ParserLoggingIntegrationTest**: Tests integration between the ArgumentParser and Logger
+
+### End-to-End Tests
+
+End-to-end tests verify the complete application functionality:
+
+- **FabricE2ETest**: Tests full application execution with command-line parameters
+
+## Testing Execution
+
+Tests can be run using the following commands from the build directory:
+
+```bash
+# Run all unit tests
+./bin/UnitTests
+
+# Run all integration tests
+./bin/IntegrationTests
+
+# Run all end-to-end tests
+./bin/E2ETests
+```
+
+## Platform Support
+
+Fabric is designed to be cross-platform with support for:
+
+- **macOS**: Version 14.0+ (Universal binary for Intel and Apple Silicon)
+- **Windows**: Windows 7+
+- **Linux**: Kernel 6.6+
+
+## Dependencies
+
+- **SDL3**: Core platform abstraction for windowing, input, and more
+- **Webview**: Library for embedding web browser views
+- **Google Test**: Testing framework for unit and integration tests
+
+## Future Expansion
+
+The modular design allows for easy expansion in these areas:
+
+1. Additional UI components
+2. More parser capabilities
+3. Enhanced platform-specific features
+4. Extended utility libraries
+
+## Initialization Flow
+
+1. **Logger Initialization**: First subsystem to initialize
+2. **Command Line Parsing**: Process startup arguments
+3. **WebView Initialization**: Set up the UI component
+4. **Main Event Loop**: Process events and handle user interaction

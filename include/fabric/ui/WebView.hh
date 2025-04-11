@@ -16,10 +16,16 @@ public:
   /**
    * @brief Construct a new WebView object
    *
+   * @param title Window title
+   * @param width Window width
+   * @param height Window height
    * @param debug Enable debug mode (shows developer tools)
+   * @param createWindow Create actual window (false for testing)
    * @param window Parent window handle (nullptr for default)
    */
-  WebView(bool debug = false, void *window = nullptr);
+  WebView(const std::string &title = "Fabric", int width = 800,
+          int height = 600, bool debug = false, bool createWindow = true,
+          void *window = nullptr);
 
   /**
    * @brief Set the window title
@@ -50,7 +56,7 @@ public:
    *
    * @param html HTML content
    */
-  void setHtml(const std::string &html);
+  void setHTML(const std::string &html);
 
   /**
    * @brief Run the main event loop
@@ -78,8 +84,16 @@ public:
   void bind(const std::string &name,
             const std::function<std::string(const std::string &)> &fn);
 
+protected:
+  // These fields are protected to allow testing
+  std::string title;
+  int width;
+  int height;
+  bool debug;
+  std::string html;
+
 private:
-  webview::webview webview_;
+  std::unique_ptr<webview::webview> webview_;
 };
 
 } // namespace Fabric

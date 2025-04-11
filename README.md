@@ -27,6 +27,8 @@ When you shift perspective toward any quantum, it becomes your new mesosphere—
 - **Command-Line Interface**: Robust argument parsing and validation
 - **Error Handling**: Comprehensive error management system
 - **Logging System**: Multi-level logging with formatting options
+- **Testing Framework**: Comprehensive unit, integration, and E2E tests
+- **Modular Architecture**: Clean separation of components for maintainability
 
 ## Implementation
 
@@ -39,10 +41,12 @@ The Fabric Engine is built with a modular architecture that supports perspective
 
 ## Documentation
 
-- [Architecture](docs/architecture.md) - Detailed architecture of the Fabric Engine
-- [Examples](docs/examples.md) - Code examples demonstrating key concepts
-- [Technical Challenges](docs/technical_challenges.md) - Implementation challenges and solutions
-- [Contributing](docs/contributing.md) - How to contribute to the project
+- [Architecture](docs/ARCHITECTURE.md) - Detailed architecture of the Fabric Engine
+- [Build Guide](docs/BUILD.md) - How to build the project on different platforms
+- [Testing Guide](docs/TESTING.md) - Overview of the testing framework and how to run tests
+- [Examples](docs/EXAMPLES.md) - Code examples demonstrating key concepts
+- [Technical Challenges](docs/TECHNICAL_CHALLENGES.md) - Implementation challenges and solutions
+- [Contributing](docs/CONTRIBUTING.md) - How to contribute to the project
 
 ## Building from Source
 
@@ -51,7 +55,9 @@ The Fabric Engine is built with a modular architecture that supports perspective
 - C++20 compatible compiler
 - Platform-specific development tools
 
-### Build Instructions
+See the [Build Guide](docs/BUILD.md) for detailed platform-specific instructions.
+
+### Quick Start
 
 ```bash
 # Clone the repository
@@ -62,11 +68,15 @@ cd fabric
 mkdir build && cd build
 
 # Configure and build
-cmake ..
+cmake .. -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug
 make
 
+# Run the tests
+./bin/UnitTests
+./bin/IntegrationTests
+
 # Run the application
-./bin/Fabric
+./bin/Fabric --help
 ```
 
 ## License

@@ -9,6 +9,9 @@ project(fabric
     LANGUAGES CXX
 )
 
+# Include custom CMake modules
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules" ${CMAKE_MODULE_PATH})
+
 # Include FetchContent for dependency management
 include(FetchContent)
 
@@ -19,6 +22,9 @@ include(FetchContent)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+# Enable testing
+enable_testing()
 
 # Output directories configuration
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
@@ -47,11 +53,12 @@ endif()
 # Set application constants
 set(APP_NAME "Fabric")
 set(APP_VERSION "${PROJECT_VERSION}")
+set(APP_EXECUTABLE_NAME "Fabric")
 
 # Configure Constants.g.h file
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Constants.g.hh.in
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Constants.g.hh
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/fabric/core/Constants.g.hh
     @ONLY
 )
 
@@ -107,20 +114,71 @@ FetchContent_Declare(
 # Make dependencies available
 FetchContent_MakeAvailable(SDL3 webview)
 
-#------------------------------------------------------------------------------
-# Source Files and Target Configuration
-#------------------------------------------------------------------------------
-# Gather all source files
-file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS src/*.cc)
+# Include Google Test for testing
+include(GoogleTest)
 
+#------------------------------------------------------------------------------
+# Source Files and Library Configuration
+#------------------------------------------------------------------------------
 # Include project headers
-include_directories(src)
+include_directories(${PROJECT_SOURCE_DIR}/include)
 
-# Define the main executable target
-add_executable(Fabric ${SRC_FILES})
+# Define the source files for each module
+file(GLOB_RECURSE CORE_SRC CONFIGURE_DEPENDS src/core/*.cc)
+file(GLOB_RECURSE UI_SRC CONFIGURE_DEPENDS src/ui/*.cc)
+file(GLOB_RECURSE UTILS_SRC CONFIGURE_DEPENDS src/utils/*.cc)
+file(GLOB_RECURSE PARSER_SRC CONFIGURE_DEPENDS src/parser/*.cc)
 
-# Link with core dependencies
-target_link_libraries(Fabric PRIVATE SDL3::SDL3-static webview::core)
+# Create a static library for the core engine
+add_library(FabricLib STATIC
+    ${CORE_SRC}
+    ${UI_SRC}
+    ${UTILS_SRC}
+    ${PARSER_SRC}
+)
+
+# Set include directories for the library
+target_include_directories(FabricLib PUBLIC
+    ${PROJECT_SOURCE_DIR}/include
+)
+
+# Link dependencies to the library
+target_link_libraries(FabricLib PUBLIC
+    SDL3::SDL3-static
+    webview::core
+)
+
+#------------------------------------------------------------------------------
+# Main Executable
+#------------------------------------------------------------------------------
+# Define the main application
+add_executable(Fabric src/core/Fabric.cc)
+
+# Link with the core library
+target_link_libraries(Fabric PRIVATE FabricLib)
+
+#------------------------------------------------------------------------------
+# Tests Configuration
+#------------------------------------------------------------------------------
+# Find all test files
+file(GLOB_RECURSE UNIT_TESTS CONFIGURE_DEPENDS tests/unit/*.cc)
+file(GLOB_RECURSE INTEGRATION_TESTS CONFIGURE_DEPENDS tests/integration/*.cc)
+file(GLOB_RECURSE E2E_TESTS CONFIGURE_DEPENDS tests/e2e/*.cc)
+
+# Create a unit test executable
+if(UNIT_TESTS)
+    add_fabric_test(UnitTests "${UNIT_TESTS}")
+endif()
+
+# Create an integration test executable
+if(INTEGRATION_TESTS)
+    add_fabric_test(IntegrationTests "${INTEGRATION_TESTS}")
+endif()
+
+# Create an end-to-end test executable
+if(E2E_TESTS)
+    add_fabric_test(E2ETests "${E2E_TESTS}")
+endif()
 
 #------------------------------------------------------------------------------
 # Platform-Specific Configuration
@@ -152,7 +210,7 @@ if(APPLE)
 
     # Link with macOS frameworks
     foreach(FRAMEWORK ${MACOS_FRAMEWORKS})
-        target_link_libraries(Fabric PRIVATE "-framework ${FRAMEWORK}")
+        target_link_libraries(FabricLib PUBLIC "-framework ${FRAMEWORK}")
     endforeach()
 endif()
 
@@ -179,7 +237,7 @@ if(IOS)
 
     # Link with iOS frameworks
     foreach(FRAMEWORK ${IOS_FRAMEWORKS})
-        target_link_libraries(Fabric PRIVATE "-framework ${FRAMEWORK}")
+        target_link_libraries(FabricLib PUBLIC "-framework ${FRAMEWORK}")
     endforeach()
 endif()
 
@@ -212,8 +270,8 @@ if(UNIX AND NOT APPLE)
     # Find and link Linux dependencies
     foreach(DEP ${LINUX_DEPENDENCIES})
         pkg_check_modules(${DEP} REQUIRED ${DEP})
-        target_include_directories(Fabric PRIVATE ${${DEP}_INCLUDE_DIRS})
-        target_link_libraries(Fabric PRIVATE ${${DEP}_LIBRARIES})
+        target_include_directories(FabricLib PUBLIC ${${DEP}_INCLUDE_DIRS})
+        target_link_libraries(FabricLib PUBLIC ${${DEP}_LIBRARIES})
     endforeach()
 endif()
 
@@ -233,9 +291,6 @@ if(WIN32)
         WIN32_EXECUTABLE TRUE
     )
 
-    # Remove the conflicting linker flag
-    # set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS")
-
     # Required Windows libraries
     set(WINDOWS_LIBRARIES
         advapi32    # Advanced Windows 32 API
@@ -253,5 +308,5 @@ if(WIN32)
     )
 
     # Link with Windows libraries
-    target_link_libraries(Fabric PRIVATE ${WINDOWS_LIBRARIES})
+    target_link_libraries(FabricLib PUBLIC ${WINDOWS_LIBRARIES})
 endif()

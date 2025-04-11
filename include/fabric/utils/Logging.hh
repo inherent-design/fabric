@@ -24,6 +24,11 @@ enum class LogLevel {
 class Logger {
 public:
   /**
+   * @brief Initialize the logging system
+   */
+  static void initialize();
+
+  /**
    * @brief Set the minimum log level to display
    *
    * @param level Minimum log level
