@@ -13,6 +13,8 @@ Our testing strategy follows these core principles:
 3. **Real-World Scenarios**: Integration and end-to-end tests should simulate actual use cases.
 4. **Testability First**: Code should be designed with testability in mind.
 5. **Continuous Testing**: Tests should be easy to run as part of the development workflow.
+6. **Thread Safety Verification**: Critical thread-safe components must include concurrent access testing.
+7. **Type Safety Assurance**: Tests must verify type safety guarantees across the API surface.
 
 ## Test Structure
 
@@ -88,6 +90,46 @@ TEST_F(LoggingTest, LogInfo) {
     std::string output = capturedOutput.str();
     ASSERT_THAT(output, ::testing::HasSubstr("INFO"));
     ASSERT_THAT(output, ::testing::HasSubstr("Info message"));
+}
+```
+
+#### Thread Safety Tests
+
+```cpp
+TEST_F(UtilsTest, TestGenerateUniqueIdThreadSafety) {
+    const int numThreads = 10;
+    const int idsPerThread = 100;
+    std::unordered_set<std::string> generatedIds;
+    std::mutex idsMutex;
+    
+    auto generateIdsTask = [&]() {
+        std::vector<std::string> threadIds;
+        threadIds.reserve(idsPerThread);
+        
+        for (int i = 0; i < idsPerThread; i++) {
+            threadIds.push_back(Utils::generateUniqueId("thread_"));
+        }
+        
+        // Add to the shared set with a lock
+        std::lock_guard<std::mutex> lock(idsMutex);
+        for (const auto& id : threadIds) {
+            generatedIds.insert(id);
+        }
+    };
+    
+    // Launch threads
+    std::vector<std::future<void>> futures;
+    for (int i = 0; i < numThreads; i++) {
+        futures.push_back(std::async(std::launch::async, generateIdsTask));
+    }
+    
+    // Wait for all threads to complete
+    for (auto& future : futures) {
+        future.wait();
+    }
+    
+    // Verify we have the expected number of unique IDs
+    ASSERT_EQ(generatedIds.size(), numThreads * idsPerThread);
 }
 ```
 

@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cctype>
 #include <sstream>
+#include <iomanip>
 
 namespace Fabric {
 
@@ -44,6 +45,24 @@ std::string Utils::trim(const std::string &str) {
              }).base();
 
   return (start < end) ? std::string(start, end) : std::string();
+}
+
+std::string Utils::generateUniqueId(const std::string& prefix, int length) {
+  static std::mutex idMutex;
+  static std::random_device rd;
+  static std::mt19937 gen(rd());
+  static std::uniform_int_distribution<> dis(0, 15);
+  
+  std::lock_guard<std::mutex> lock(idMutex);
+  
+  std::stringstream ss;
+  ss << prefix;
+  
+  for (int i = 0; i < length; i++) {
+    ss << std::hex << dis(gen);
+  }
+  
+  return ss.str();
 }
 
 } // namespace Fabric

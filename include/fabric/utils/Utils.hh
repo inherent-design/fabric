@@ -2,6 +2,8 @@
 
 #include <string>
 #include <vector>
+#include <mutex>
+#include <random>
 
 namespace Fabric {
 
@@ -41,6 +43,17 @@ public:
    * @return Trimmed string
    */
   static std::string trim(const std::string &str);
+  
+  /**
+   * @brief Generate a unique ID with a prefix
+   * 
+   * Thread-safe implementation for generating unique identifiers.
+   * 
+   * @param prefix Prefix to use for the ID
+   * @param length Length of the random part of the ID
+   * @return Unique ID string
+   */
+  static std::string generateUniqueId(const std::string& prefix, int length = 8);
 };
 
 } // namespace Fabric

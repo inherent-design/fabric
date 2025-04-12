@@ -64,10 +64,14 @@ fabric/
 
 ### Core Components
 
-The core components provide the application framework and entry point:
+The core components provide the application framework, entry point, and foundational patterns:
 
-- **Fabric.cc**: Application entry point that initializes subsystems and handles the main event loop.
-- **Constants.g.hh**: Generated constants used throughout the application.
+- **Fabric.cc**: Application entry point that initializes subsystems and handles the main event loop
+- **Constants.g.hh**: Generated constants used throughout the application
+- **Component.hh/cc**: Base class for UI components with lifecycle management and properties
+- **Event.hh/cc**: Event system for communication between components
+- **Lifecycle.hh/cc**: Component lifecycle state management
+- **Plugin.hh/cc**: Plugin architecture for extensibility
 
 ### Parser Components
 
@@ -87,9 +91,10 @@ The UI system provides a web-based user interface:
 
 Utility components provide common functionality used throughout the application:
 
-- **Logging**: Configurable logging system with multiple severity levels.
-- **ErrorHandling**: Exception handling and error reporting.
-- **Utils**: General utility functions for string manipulation, file operations, etc.
+- **Logging**: Configurable logging system with multiple severity levels
+- **ErrorHandling**: Exception handling and error reporting
+- **Utils**: Thread-safe utility functions for string manipulation, UUID generation, etc.
+- **Testing**: Testing utilities and mock implementations for unit and integration tests
 
 ## Build System
 
@@ -112,15 +117,21 @@ Unit tests focus on testing individual components in isolation:
 
 - **ArgumentParserTest**: Tests CLI argument parsing functionality
 - **WebViewTest**: Tests UI webview functionality
+- **ComponentTest**: Tests component properties and hierarchy management
+- **EventTest**: Tests event dispatching and handling
+- **LifecycleTest**: Tests component lifecycle state transitions
+- **PluginTest**: Tests plugin loading and integration
+- **CoreApiTest**: Tests interactions between core components
 - **LoggingTest**: Tests logging system
 - **ErrorHandlingTest**: Tests error handling
-- **UtilsTest**: Tests utility functions
+- **UtilsTest**: Tests utility functions including thread-safety
 
 ### Integration Tests
 
 Integration tests verify the interaction between multiple components:
 
 - **ParserLoggingIntegrationTest**: Tests integration between the ArgumentParser and Logger
+- **ComponentLifecycleIntegrationTest**: Tests how components interact with lifecycle state transitions
 
 ### End-to-End Tests
 

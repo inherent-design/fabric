@@ -23,11 +23,16 @@ When you shift perspective toward any quantum, it becomes your new mesosphere—
 ## Current Features
 
 - **Cross-Platform Core**: Windows, macOS, and Linux support
+- **Component System**: Type-safe, thread-safe component architecture with variant-based properties
+- **Event System**: Thread-safe event handling with proper propagation and type-safe data
+- **Lifecycle Management**: Thread-safe component lifecycle with validated state transitions
+- **Plugin Architecture**: Thread-safe, dependency-aware plugin system with resource management
 - **WebView Integration**: Native webview with bidirectional JavaScript bridge
 - **Command-Line Interface**: Robust argument parsing and validation
 - **Error Handling**: Comprehensive error management system
 - **Logging System**: Multi-level logging with formatting options
-- **Testing Framework**: Comprehensive unit, integration, and E2E tests
+- **Testing Framework**: Comprehensive unit, integration, and thread safety tests
+- **Utility Framework**: Thread-safe UUID generation and common operations
 - **Modular Architecture**: Clean separation of components for maintainability
 
 ## Implementation
@@ -47,6 +52,7 @@ The Fabric Engine is built with a modular architecture that supports perspective
 - [Examples](docs/EXAMPLES.md) - Code examples demonstrating key concepts
 - [Technical Challenges](docs/TECHNICAL_CHALLENGES.md) - Implementation challenges and solutions
 - [Contributing](docs/CONTRIBUTING.md) - How to contribute to the project
+- [Roadmap](docs/ROADMAP.md) - Planned features and development timeline
 
 ## Building from Source
 

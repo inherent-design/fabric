@@ -2,6 +2,9 @@
 #include "gtest/gtest.h"
 #include <string>
 #include <vector>
+#include <unordered_set>
+#include <thread>
+#include <future>
 
 // Test fixture for Utils tests
 class UtilsTest : public ::testing::Test {};
@@ -80,4 +83,61 @@ TEST_F(UtilsTest, TestTrim) {
   ASSERT_EQ("", Fabric::Utils::trim(""));
   ASSERT_EQ("", Fabric::Utils::trim("    "));
   ASSERT_EQ("Hello", Fabric::Utils::trim(" \t\n\r Hello \t\n\r "));
+}
+
+// Test generateUniqueId - basic functionality
+TEST_F(UtilsTest, TestGenerateUniqueId) {
+  // Generate IDs with different prefixes
+  std::string id1 = Fabric::Utils::generateUniqueId("test_");
+  std::string id2 = Fabric::Utils::generateUniqueId("test_");
+  
+  // Verify IDs are not empty and have the correct prefix
+  ASSERT_FALSE(id1.empty());
+  ASSERT_FALSE(id2.empty());
+  ASSERT_TRUE(Fabric::Utils::startsWith(id1, "test_"));
+  ASSERT_TRUE(Fabric::Utils::startsWith(id2, "test_"));
+  
+  // Verify IDs are different (uniqueness)
+  ASSERT_NE(id1, id2);
+  
+  // Verify length based on parameter
+  std::string id3 = Fabric::Utils::generateUniqueId("prefix_", 4);
+  ASSERT_EQ(id3.length(), 11); // "prefix_" (7) + 4 hex digits
+}
+
+// Test generateUniqueId - thread safety and uniqueness
+TEST_F(UtilsTest, TestGenerateUniqueIdThreadSafety) {
+  const int numThreads = 10;
+  const int idsPerThread = 100;
+  std::unordered_set<std::string> generatedIds;
+  std::mutex idsMutex;
+  
+  auto generateIdsTask = [&]() {
+    std::vector<std::string> threadIds;
+    threadIds.reserve(idsPerThread);
+    
+    for (int i = 0; i < idsPerThread; i++) {
+      threadIds.push_back(Fabric::Utils::generateUniqueId("thread_"));
+    }
+    
+    // Add to the shared set with a lock
+    std::lock_guard<std::mutex> lock(idsMutex);
+    for (const auto& id : threadIds) {
+      generatedIds.insert(id);
+    }
+  };
+  
+  // Launch threads
+  std::vector<std::future<void>> futures;
+  for (int i = 0; i < numThreads; i++) {
+    futures.push_back(std::async(std::launch::async, generateIdsTask));
+  }
+  
+  // Wait for all threads to complete
+  for (auto& future : futures) {
+    future.wait();
+  }
+  
+  // Verify we have the expected number of unique IDs
+  ASSERT_EQ(generatedIds.size(), numThreads * idsPerThread);
 }

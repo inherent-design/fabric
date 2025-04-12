@@ -137,6 +137,16 @@ add_library(FabricLib STATIC
     ${PARSER_SRC}
 )
 
+# Mark explicitly which components are part of the core API
+set_source_files_properties(
+    src/core/Component.cc
+    src/core/Event.cc
+    src/core/Lifecycle.cc
+    src/core/Plugin.cc
+    PROPERTIES
+    COMPILE_DEFINITIONS "FABRIC_CORE_API"
+)
+
 # Set include directories for the library
 target_include_directories(FabricLib PUBLIC
     ${PROJECT_SOURCE_DIR}/include
@@ -164,6 +174,29 @@ target_link_libraries(Fabric PRIVATE FabricLib)
 file(GLOB_RECURSE UNIT_TESTS CONFIGURE_DEPENDS tests/unit/*.cc)
 file(GLOB_RECURSE INTEGRATION_TESTS CONFIGURE_DEPENDS tests/integration/*.cc)
 file(GLOB_RECURSE E2E_TESTS CONFIGURE_DEPENDS tests/e2e/*.cc)
+
+# Add the function to create test executables
+function(add_fabric_test TEST_NAME TEST_SOURCES)
+  # Create the test executable
+  add_executable(${TEST_NAME} ${TEST_SOURCES})
+  
+  # Link with Google Test, GMock, and our library
+  target_link_libraries(${TEST_NAME} PRIVATE 
+      gtest 
+      gtest_main
+      gmock
+      gmock_main
+      FabricLib
+  )
+  
+  # Add the test to CTest
+  add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
+  
+  # Set the test's working directory
+  set_tests_properties(${TEST_NAME} PROPERTIES 
+      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  )
+endfunction()
 
 # Create a unit test executable
 if(UNIT_TESTS)
