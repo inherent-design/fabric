@@ -52,40 +52,49 @@
   - [ ] Add resource reference tracking
   - [ ] Design resource transformation pipeline
 
-- [ ] **Spatial Primitives & Scene Graph**
-  - [ ] Implement core spatial primitives (Vector, Matrix, Transform)
+- [ ] **Scale-Aware Scene System**
+  - [ ] Integrate GLM math library for spatial operations
   - [ ] Create hierarchical scene node structure
-  - [ ] Develop spatial partitioning system
-  - [ ] Add view frustum and visibility determination
-  - [ ] Design scale-aware spatial relationships
+  - [ ] Develop multi-scale space partitioning
+  - [ ] Implement scale-transition boundaries
+  - [ ] Design perspective-dependent rendering system
 
 - [ ] **Temporal Dimension System**
-  - [ ] Implement timeline with varying time scales
-  - [ ] Create timeline regions with different time flows
-  - [ ] Develop snapshot/restore system for time states
-  - [ ] Add interpolation between timeline states
-  - [ ] Design prediction system for temporal evolution
+  - [ ] Design timeline with variable time scales
+  - [ ] Implement state snapshot/restoration system
+  - [ ] Create history tracking with branching support
+  - [ ] Add event scheduling across timeline
+  - [ ] Develop time-based interpolation system
 
 ### SDL3 Integration
-- [ ] Implement windowing system abstraction
-- [ ] Create input handling subsystem (keyboard, mouse, touch)
-- [ ] Develop rendering pipeline for 2D elements
-- [ ] Implement audio subsystem integration
+- [ ] Implement windowing system with SDL3
+- [ ] Create abstracted render context for non-UI visuals
+- [ ] Develop hardware-accelerated 2D/3D rendering pipeline
+- [ ] Implement spatial audio system
+- [ ] Design input handling for non-UI interactions
+- [ ] Create camera and viewport management system
 
 ### WebView Integration
-- [ ] Create WebView component wrapper
-- [ ] Implement JavaScript bridge for native/web communication
-- [ ] Design resource loading and caching system
-- [ ] Create WebView event handling integrations
+- [ ] Implement WebView component with bidirectional JS bridge
+- [ ] Design C++/JavaScript state synchronization
+- [ ] Create reactive UI binding system
+- [ ] Develop asset serving for web content
+- [ ] Add debug tools for WebView/C++ integration
+- [ ] Implement WebView process isolation and security
 
 ### Testing Infrastructure
-- [ ] Expand unit testing framework for UI components
-- [ ] Create integration tests for SDL3 components
-- [ ] Develop E2E testing for WebView functionality
-- [ ] Implement performance benchmarking tools
+- [ ] Develop specialized test harnesses for commands and reactive systems
+- [ ] Create scale transition testing framework
+- [ ] Implement WebView component testing
+- [ ] Design multi-scale stress tests
+- [ ] Create timeline and temporal state tests
+- [ ] Build performance benchmarking for critical operations
 
 ### Documentation and Examples
-- [ ] Create comprehensive API documentation
-- [ ] Develop quickstart guide with examples
-- [ ] Create tutorial series for common use cases
-- [ ] Document extension patterns with examples
+- [ ] Develop comprehensive API documentation
+- [ ] Create scale transition guides
+- [ ] Build example applications demonstrating perspective fluidity
+- [ ] Document WebView/C++ integration patterns
+- [ ] Create tutorials for reactive programming patterns
+- [ ] Provide performance optimization guides
+- [ ] Develop extension and plugin authoring documentation
