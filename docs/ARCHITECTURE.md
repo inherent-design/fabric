@@ -1,5 +1,22 @@
 # Fabric Engine Architecture
 
+[← Back to Documentation Index](DOCUMENTATION.md)
+
+## Table of Contents
+- [Overview](#overview)
+- [Project Structure](#project-structure)
+- [Component Design](#component-design)
+  - [Core Components](#core-components)
+  - [Parser Components](#parser-components)
+  - [UI Components](#ui-components)
+  - [Utility Components](#utility-components)
+- [Build System](#build-system)
+- [Testing Architecture](#testing-architecture)
+- [Platform Support](#platform-support)
+- [Dependencies](#dependencies)
+- [Future Expansion](#future-expansion)
+- [Initialization Flow](#initialization-flow)
+
 ## Overview
 
 Fabric is a modern C++20 cross-platform framework for building applications with an embedded web UI. It combines native C++ performance with the flexibility of HTML/CSS/JavaScript for the user interface.

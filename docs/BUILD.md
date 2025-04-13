@@ -1,5 +1,30 @@
 # Fabric Engine Build Guide
 
+[← Back to Documentation Index](DOCUMENTATION.md)
+
+## Table of Contents
+- [Prerequisites](#prerequisites)
+  - [Required Tools](#required-tools)
+  - [Optional Tools](#optional-tools)
+- [Platform-Specific Requirements](#platform-specific-requirements)
+  - [macOS](#macos)
+  - [Windows](#windows)
+  - [Linux](#linux)
+- [Building Fabric](#building-fabric)
+  - [Basic Build](#basic-build)
+  - [Build Options](#build-options)
+  - [Using Ninja for Faster Builds](#using-ninja-for-faster-builds)
+  - [Building on macOS](#building-on-macos)
+  - [Building on Windows](#building-on-windows)
+  - [Building on Linux](#building-on-linux)
+- [Running Tests](#running-tests)
+- [Running the Application](#running-the-application)
+- [Common Build Issues](#common-build-issues)
+- [Dependencies](#dependencies)
+- [Custom Builds](#custom-builds)
+- [Continuous Integration](#continuous-integration)
+- [Additional Resources](#additional-resources)
+
 ## Prerequisites
 
 To build Fabric Engine, you need the following tools and libraries:
@@ -217,3 +242,7 @@ Fabric uses GitHub Actions for CI. Each pull request is automatically built and 
 - [Google Test Documentation](https://google.github.io/googletest/)
 - [SDL3 Documentation](https://wiki.libsdl.org/SDL3/)
 - [WebView Documentation](https://github.com/webview/webview)
+
+---
+
+[← Back to Documentation Index](DOCUMENTATION.md)

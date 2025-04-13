@@ -1,5 +1,21 @@
 # Fabric Project Roadmap
 
+[← Back to Documentation Index](DOCUMENTATION.md)
+
+## Table of Contents
+- [Schedule (0-3 Months)](#schedule-0-3-months)
+  - [Month 1: Core Foundation](#month-1-core-foundation)
+  - [Quantum Fluctuation Update](#surprise--quantum-fluctuation--update)
+  - [Month 2: UI Framework](#month-2-ui-framework)
+  - [Month 3: Testing and Refinement](#month-3-testing-and-refinement)
+- [Task List](#task-list)
+  - [API Design and Core Patterns](#api-design-and-core-patterns)
+  - [Quantum Fluctuation Update](#quantum-fluctuation-update)
+  - [SDL3 Integration](#sdl3-integration)
+  - [WebView Integration](#webview-integration)
+  - [Testing Infrastructure](#testing-infrastructure)
+  - [Documentation and Examples](#documentation-and-examples)
+
 ## Schedule (0-3 Months)
 
 ### Month 1: Core Foundation

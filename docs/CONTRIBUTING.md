@@ -1,6 +1,26 @@
 # Contributing to Fabric Engine
 
+[← Back to Documentation Index](DOCUMENTATION.md)
+
 > *"To contribute meaningfully, first understand that your perspective shapes what you perceive as problems and solutions. The most valuable insights often come from shifting to a viewpoint where the problem itself is transformed."*
+
+## Table of Contents
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Development Environment Setup](#development-environment-setup)
+- [Project Structure](#project-structure)
+- [Coding Guidelines](#coding-guidelines)
+  - [C++ Style Guidelines](#c-style-guidelines)
+  - [Naming Conventions](#naming-conventions)
+  - [Code Documentation](#code-documentation)
+- [Technical Challenges](#technical-challenges)
+  - [Performance Optimization](#performance-optimization)
+  - [State Coherence](#state-coherence)
+  - [Rendering Challenges](#rendering-challenges)
+- [Pull Request Process](#pull-request-process)
+- [Running Tests](#running-tests)
+- [Community](#community)
+- [License](#license)
 
 ## Getting Started
 
@@ -137,3 +157,7 @@ Join our community channels to ask questions and get help:
 ## License
 
 By contributing to Fabric Engine, you agree that your contributions will be licensed under the project's [MIT License](../LICENSE).
+
+---
+
+[← Back to Documentation Index](DOCUMENTATION.md)

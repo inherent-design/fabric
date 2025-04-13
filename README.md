@@ -46,13 +46,14 @@ The Fabric Engine is built with a modular architecture that supports perspective
 
 ## Documentation
 
-- [Architecture](docs/ARCHITECTURE.md) - Detailed architecture of the Fabric Engine
-- [Build Guide](docs/BUILD.md) - How to build the project on different platforms
-- [Testing Guide](docs/TESTING.md) - Overview of the testing framework and how to run tests
-- [Examples](docs/EXAMPLES.md) - Code examples demonstrating key concepts
-- [Technical Challenges](docs/TECHNICAL_CHALLENGES.md) - Implementation challenges and solutions
-- [Contributing](docs/CONTRIBUTING.md) - How to contribute to the project
-- [Roadmap](docs/ROADMAP.md) - Planned features and development timeline
+[**View Full Documentation**](docs/DOCUMENTATION.md) - Complete documentation hub with navigation
+
+Key documents:
+- [Architecture](docs/ARCHITECTURE.md) - Detailed system architecture
+- [Build Guide](docs/BUILD.md) - Build instructions for all platforms
+- [Roadmap](docs/ROADMAP.md) - Development timeline and planned features
+- [Examples](docs/EXAMPLES.md) - Code examples and tutorials
+- [Quantum Fluctuation](docs/QUANTUM_FLUCTUATION.md) - Latest feature update design doc
 
 ## Building from Source
 

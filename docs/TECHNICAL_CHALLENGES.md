@@ -1,6 +1,34 @@
 # Technical Challenges in Fabric Engine
 
+[← Back to Documentation Index](DOCUMENTATION.md)
+
 This document outlines the key technical challenges and implementation considerations for Fabric Engine's perspective-fluid architecture.
+
+## Table of Contents
+- [Performance Optimization](#performance-optimization)
+  - [Memory Management](#memory-management)
+  - [Spatial Partitioning](#spatial-partitioning)
+  - [Multi-threading](#multi-threading)
+  - [Lazy Instantiation](#lazy-instantiation)
+  - [Garbage Collection](#garbage-collection)
+- [State Coherence](#state-coherence)
+  - [Scale-Appropriate Physics](#scale-appropriate-physics)
+  - [Propagation Rules](#propagation-rules)
+  - [Caching Strategies](#caching-strategies)
+  - [Event Bubbling](#event-bubbling)
+  - [Serialization](#serialization)
+- [Rendering Challenges](#rendering-challenges)
+  - [Level of Detail Transitions](#level-of-detail-transitions)
+  - [Adaptive Tessellation](#adaptive-tessellation)
+  - [Floating Point Precision](#floating-point-precision)
+  - [Coordinate System Management](#coordinate-system-management)
+  - [Streaming Architecture](#streaming-architecture)
+- [Implementation Considerations](#implementation-considerations)
+  - [API Design](#api-design)
+  - [Compiler Optimization](#compiler-optimization)
+  - [Cross-Platform Compatibility](#cross-platform-compatibility)
+  - [Benchmarking Tools](#benchmarking-tools)
+  - [Debugging Infrastructure](#debugging-infrastructure)
 
 ## Performance Optimization
 
@@ -129,3 +157,7 @@ This document outlines the key technical challenges and implementation considera
 - **Visualization Tools**: Visualize the quantum hierarchy and active transitions
 - **Automated Testing**: Test perspective transitions with automated synthetic observers
 - **Deterministic Playback**: Record and replay perspective shifts for debugging
+
+---
+
+[← Back to Documentation Index](DOCUMENTATION.md)
