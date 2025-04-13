@@ -14,6 +14,8 @@
   - [Basic Build](#basic-build)
   - [Build Options](#build-options)
   - [Using Ninja for Faster Builds](#using-ninja-for-faster-builds)
+  - [Using CCache for Faster Compilation](#using-ccache-for-faster-compilation)
+  - [Combining Ninja and CCache](#combining-ninja-and-ccache)
   - [Building on macOS](#building-on-macos)
   - [Building on Windows](#building-on-windows)
   - [Building on Linux](#building-on-linux)
@@ -112,10 +114,41 @@ The following options can be passed to CMake:
 
 ### Using Ninja for Faster Builds
 
+[Ninja](https://ninja-build.org/) is a build system designed for speed, especially for incremental builds. It's significantly faster than Make or MSBuild.
+
 ```bash
+# Configure with Ninja
 cmake .. -G "Ninja" -DCMAKE_BUILD_TYPE=Debug
+
+# Build with Ninja
 ninja
 ```
+
+### Using CCache for Faster Compilation
+
+[CCache](https://ccache.dev/) is a compiler cache that speeds up recompilation by caching previous compilations and detecting when the same compilation is being done again. This is particularly useful during development when you're making small changes and recompiling frequently.
+
+```bash
+# Configure CMake to use ccache
+cmake .. -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=Debug
+
+# Build as normal
+make
+```
+
+### Combining Ninja and CCache
+
+For maximum build performance, you can combine Ninja and CCache:
+
+```bash
+# Configure with both Ninja and CCache
+cmake .. -G "Ninja" -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=Debug
+
+# Build with Ninja
+ninja
+```
+
+This combination provides both the parallel build speed of Ninja and the compilation caching of CCache, significantly reducing build times during development.
 
 ### Building on macOS
 
