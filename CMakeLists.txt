@@ -64,42 +64,35 @@ include(FetchContent)
 # Google Test for testing
 include(GoogleTest)
 
-# SDL3 Configuration (only if needed)
-option(FABRIC_USE_SDL "Use SDL for rendering and input" ON)
-if(FABRIC_USE_SDL)
-    FetchContent_Declare(
-        SDL3
-        GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-        GIT_TAG release-3.2.10
-    )
-    
-    # SDL3 build options
-    set(SDL_SHARED OFF CACHE BOOL "Build SDL shared libraries" FORCE)
-    set(SDL_STATIC ON CACHE BOOL "Build SDL static libraries" FORCE)
-    set(SDL_TEST OFF CACHE BOOL "Build SDL tests" FORCE)
-    
-    # Enable core SDL3 subsystems
-    foreach(SUBSYSTEM IN ITEMS AUDIO VIDEO RENDER EVENTS JOYSTICK HIDAPI SENSOR THREADS TIMERS)
-        set(SDL_${SUBSYSTEM} ON CACHE BOOL "Enable SDL ${SUBSYSTEM}" FORCE)
-    endforeach()
-    
-    FetchContent_MakeAvailable(SDL3)
-endif()
+# SDL3 Configuration
+FetchContent_Declare(
+    SDL3
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+    GIT_TAG release-3.2.10
+)
 
-# WebView (only if needed)
-option(FABRIC_USE_WEBVIEW "Use WebView for UI" ON)
-if(FABRIC_USE_WEBVIEW)
-    add_compile_definitions(FABRIC_USE_WEBVIEW)
-endif()
-if(FABRIC_USE_WEBVIEW)
-    FetchContent_Declare(
-        webview
-        GIT_REPOSITORY https://github.com/webview/webview
-        GIT_TAG 0.12.0
-    )
-    
-    FetchContent_MakeAvailable(webview)
-endif()
+# SDL3 build options
+set(SDL_SHARED OFF CACHE BOOL "Build SDL shared libraries" FORCE)
+set(SDL_STATIC ON CACHE BOOL "Build SDL static libraries" FORCE)
+set(SDL_TEST OFF CACHE BOOL "Build SDL tests" FORCE)
+
+# Enable core SDL3 subsystems
+foreach(SUBSYSTEM IN ITEMS AUDIO VIDEO RENDER EVENTS JOYSTICK HIDAPI SENSOR THREADS TIMERS)
+    set(SDL_${SUBSYSTEM} ON CACHE BOOL "Enable SDL ${SUBSYSTEM}" FORCE)
+endforeach()
+
+FetchContent_MakeAvailable(SDL3)
+
+# WebView
+add_compile_definitions(FABRIC_USE_WEBVIEW)
+
+FetchContent_Declare(
+    webview
+    GIT_REPOSITORY https://github.com/webview/webview
+    GIT_TAG 0.12.0
+)
+
+FetchContent_MakeAvailable(webview)
 
 #------------------------------------------------------------------------------
 # Source Files and Library Configuration
@@ -115,7 +108,7 @@ set(FABRIC_CORE_SOURCE_FILES
     src/core/Resource.cc
     src/core/Spatial.cc
     src/core/Temporal.cc
-    src/core/GraphResourceManager.cc
+    src/core/ResourceHub.cc
 )
 
 # Utils library components
@@ -124,13 +117,12 @@ file(GLOB FABRIC_UTILS_SOURCE_FILES src/utils/*.cc)
 # Parser library components
 file(GLOB FABRIC_PARSER_SOURCE_FILES src/parser/*.cc)
 
-# UI library components (optional)
-if(FABRIC_USE_WEBVIEW)
-    file(GLOB FABRIC_UI_SOURCE_FILES src/ui/*.cc)
-endif()
+# UI library components
+file(GLOB FABRIC_UI_SOURCE_FILES src/ui/*.cc)
 
-# Create the Fabric static library
-add_library(FabricLib STATIC
+# Create the Fabric program
+add_executable(Fabric 
+    src/core/Fabric.cc
     ${FABRIC_CORE_SOURCE_FILES}
     ${FABRIC_UTILS_SOURCE_FILES}
     ${FABRIC_PARSER_SOURCE_FILES}
@@ -145,36 +137,18 @@ set_source_files_properties(
 )
 
 # Include directories
-target_include_directories(FabricLib 
-    PUBLIC 
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>
+target_include_directories(Fabric 
+    PRIVATE 
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 # Library dependencies
-target_link_libraries(FabricLib 
-    PUBLIC 
+target_link_libraries(Fabric 
+    PRIVATE 
         Threads::Threads
+        SDL3::SDL3-static
+        webview::core
 )
-
-# Add SDL3 if enabled
-if(FABRIC_USE_SDL)
-    target_link_libraries(FabricLib PUBLIC SDL3::SDL3-static)
-endif()
-
-# Add WebView if enabled
-if(FABRIC_USE_WEBVIEW)
-    target_link_libraries(FabricLib PUBLIC webview::core)
-endif()
-
-#------------------------------------------------------------------------------
-# Main Executable
-#------------------------------------------------------------------------------
-# Create the main application executable if Fabric.cc exists
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/core/Fabric.cc")
-    add_executable(Fabric src/core/Fabric.cc)
-    target_link_libraries(Fabric PRIVATE FabricLib)
-endif()
 
 #------------------------------------------------------------------------------
 # Testing Configuration
@@ -189,14 +163,29 @@ if(FABRIC_BUILD_TESTS)
     add_executable(IntegrationTests)
     add_executable(E2ETests)
     
-    # Link against GTest and FabricLib
+    # Add include directories
+    target_include_directories(UnitTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+    target_include_directories(IntegrationTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+    target_include_directories(E2ETests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+    
+    # Link against GTest and the Fabric source files directly
     foreach(TEST_TARGET UnitTests IntegrationTests E2ETests)
         target_link_libraries(${TEST_TARGET} PRIVATE 
             gtest 
             gtest_main
             gmock
             gmock_main
-            FabricLib
+            Threads::Threads
+            SDL3::SDL3-static
+            webview::core
+        )
+        
+        # Add Fabric source files to test executable
+        target_sources(${TEST_TARGET} PRIVATE
+            ${FABRIC_CORE_SOURCE_FILES}
+            ${FABRIC_UTILS_SOURCE_FILES}
+            ${FABRIC_PARSER_SOURCE_FILES}
+            ${FABRIC_UI_SOURCE_FILES}
         )
     endforeach()
     
@@ -220,31 +209,36 @@ if(APPLE)
         set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "Build architectures for macOS")
     endif()
     
-    # Only add required frameworks if WebView/SDL are enabled
-    if(FABRIC_USE_WEBVIEW)
-        set(MACOS_UI_FRAMEWORKS
-            Cocoa
-            WebKit
-        )
-        
-        foreach(FRAMEWORK ${MACOS_UI_FRAMEWORKS})
-            target_link_libraries(FabricLib PUBLIC "-framework ${FRAMEWORK}")
-        endforeach()
-    endif()
+    # Add required frameworks
+    set(MACOS_UI_FRAMEWORKS
+        Cocoa
+        WebKit
+    )
     
-    if(FABRIC_USE_SDL)
-        set(MACOS_MEDIA_FRAMEWORKS
-            CoreAudio
-            AudioToolbox
-            CoreHaptics
-            CoreVideo
-            Metal
-            GameController
-            IOKit
-        )
-        
-        foreach(FRAMEWORK ${MACOS_MEDIA_FRAMEWORKS})
-            target_link_libraries(FabricLib PUBLIC "-framework ${FRAMEWORK}")
+    foreach(FRAMEWORK ${MACOS_UI_FRAMEWORKS})
+        target_link_libraries(Fabric PRIVATE "-framework ${FRAMEWORK}")
+    endforeach()
+    
+    set(MACOS_MEDIA_FRAMEWORKS
+        CoreAudio
+        AudioToolbox
+        CoreHaptics
+        CoreVideo
+        Metal
+        GameController
+        IOKit
+    )
+    
+    foreach(FRAMEWORK ${MACOS_MEDIA_FRAMEWORKS})
+        target_link_libraries(Fabric PRIVATE "-framework ${FRAMEWORK}")
+    endforeach()
+    
+    # Add frameworks to test targets too
+    if(FABRIC_BUILD_TESTS)
+        foreach(TEST_TARGET UnitTests IntegrationTests E2ETests)
+            foreach(FRAMEWORK ${MACOS_UI_FRAMEWORKS} ${MACOS_MEDIA_FRAMEWORKS})
+                target_link_libraries(${TEST_TARGET} PRIVATE "-framework ${FRAMEWORK}")
+            endforeach()
         endforeach()
     endif()
 endif()
@@ -253,21 +247,30 @@ endif()
 if(UNIX AND NOT APPLE)
     message(STATUS "Configuring for Linux")
     
-    # Only search for dependencies if needed
-    if(FABRIC_USE_WEBVIEW OR FABRIC_USE_SDL)
-        find_package(PkgConfig REQUIRED)
-        
-        if(FABRIC_USE_WEBVIEW)
-            pkg_check_modules(WEBKIT REQUIRED webkit2gtk-4.0)
-            target_include_directories(FabricLib PUBLIC ${WEBKIT_INCLUDE_DIRS})
-            target_link_libraries(FabricLib PUBLIC ${WEBKIT_LIBRARIES})
-        endif()
-        
-        if(FABRIC_USE_SDL)
-            pkg_check_modules(X11 REQUIRED x11 xrandr xext xi)
-            target_include_directories(FabricLib PUBLIC ${X11_INCLUDE_DIRS})
-            target_link_libraries(FabricLib PUBLIC ${X11_LIBRARIES})
-        endif()
+    find_package(PkgConfig REQUIRED)
+    
+    # WebView dependencies
+    pkg_check_modules(WEBKIT REQUIRED webkit2gtk-4.0)
+    target_include_directories(Fabric PRIVATE ${WEBKIT_INCLUDE_DIRS})
+    target_link_libraries(Fabric PRIVATE ${WEBKIT_LIBRARIES})
+    
+    # SDL dependencies
+    pkg_check_modules(X11 REQUIRED x11 xrandr xext xi)
+    target_include_directories(Fabric PRIVATE ${X11_INCLUDE_DIRS})
+    target_link_libraries(Fabric PRIVATE ${X11_LIBRARIES})
+    
+    # Add dependencies to test targets too
+    if(FABRIC_BUILD_TESTS)
+        foreach(TEST_TARGET UnitTests IntegrationTests E2ETests)
+            target_include_directories(${TEST_TARGET} PRIVATE 
+                ${WEBKIT_INCLUDE_DIRS}
+                ${X11_INCLUDE_DIRS}
+            )
+            target_link_libraries(${TEST_TARGET} PRIVATE 
+                ${WEBKIT_LIBRARIES}
+                ${X11_LIBRARIES}
+            )
+        endforeach()
     endif()
 endif()
 
@@ -282,22 +285,25 @@ if(WIN32)
         NTDDI_VERSION=0x06010000
     )
     
-    # Configure as Windows GUI application when building the main executable
-    if(TARGET Fabric)
-        set_target_properties(Fabric PROPERTIES WIN32_EXECUTABLE TRUE)
-    endif()
+    # Configure as Windows GUI application
+    set_target_properties(Fabric PROPERTIES WIN32_EXECUTABLE TRUE)
     
-    # Only add Windows-specific libraries if needed
-    if(FABRIC_USE_WEBVIEW OR FABRIC_USE_SDL)
-        set(WINDOWS_LIBRARIES
-            user32      # User Interface
-            gdi32       # Graphics Device Interface
-            ole32       # OLE 32-bit
-            shell32     # Shell
-            advapi32    # Advanced Windows 32 API
-        )
-        
-        target_link_libraries(FabricLib PUBLIC ${WINDOWS_LIBRARIES})
+    # Windows-specific libraries
+    set(WINDOWS_LIBRARIES
+        user32      # User Interface
+        gdi32       # Graphics Device Interface
+        ole32       # OLE 32-bit
+        shell32     # Shell
+        advapi32    # Advanced Windows 32 API
+    )
+    
+    target_link_libraries(Fabric PRIVATE ${WINDOWS_LIBRARIES})
+    
+    # Add Windows libraries to test targets too
+    if(FABRIC_BUILD_TESTS)
+        foreach(TEST_TARGET UnitTests IntegrationTests E2ETests)
+            target_link_libraries(${TEST_TARGET} PRIVATE ${WINDOWS_LIBRARIES})
+        endforeach()
     endif()
 endif()
 
@@ -307,44 +313,13 @@ endif()
 # Set installation directories
 include(GNUInstallDirs)
 
-# Install library
-install(TARGETS FabricLib
-    EXPORT FabricTargets
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+# Install executable
+install(TARGETS Fabric
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
-
-# Install main executable if it exists
-if(TARGET Fabric)
-    install(TARGETS Fabric
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    )
-endif()
 
 # Install headers
 install(DIRECTORY include/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     FILES_MATCHING PATTERN "*.hh"
-)
-
-# Generate and install package configuration
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-    "${CMAKE_CURRENT_BINARY_DIR}/FabricConfigVersion.cmake"
-    VERSION ${PROJECT_VERSION}
-    COMPATIBILITY SameMajorVersion
-)
-
-install(EXPORT FabricTargets
-    FILE FabricTargets.cmake
-    NAMESPACE Fabric::
-    DESTINATION lib/cmake/Fabric
-)
-
-configure_file(cmake/FabricConfig.cmake.in "${CMAKE_CURRENT_BINARY_DIR}/FabricConfig.cmake" @ONLY)
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/FabricConfig.cmake"
-              "${CMAKE_CURRENT_BINARY_DIR}/FabricConfigVersion.cmake"
-        DESTINATION lib/cmake/Fabric
 )

@@ -27,12 +27,15 @@ When you shift perspective toward any quantum, it becomes your new mesosphere—
 - **Event System**: Thread-safe event handling with proper propagation and type-safe data
 - **Lifecycle Management**: Thread-safe component lifecycle with validated state transitions
 - **Plugin Architecture**: Thread-safe, dependency-aware plugin system with resource management
+- **Concurrency Model**: Intent-based locking with awareness propagation for deadlock prevention
+- **Resource Management**: Thread-safe resource loading with dependency tracking
+- **Time System**: Multi-timeline temporal processing with variable time flow
+- **Spatial System**: Type-safe vector operations with coordinate space transformations
 - **WebView Integration**: Native webview with bidirectional JavaScript bridge
 - **Command-Line Interface**: Robust argument parsing and validation
 - **Error Handling**: Comprehensive error management system
 - **Logging System**: Multi-level logging with formatting options
 - **Testing Framework**: Comprehensive unit, integration, and thread safety tests
-- **Utility Framework**: Thread-safe UUID generation and common operations
 - **Modular Architecture**: Clean separation of components for maintainability
 
 ## Implementation
@@ -51,9 +54,9 @@ The Fabric Engine is built with a modular architecture that supports perspective
 Key documents:
 - [Architecture](docs/ARCHITECTURE.md) - Detailed system architecture
 - [Build Guide](docs/BUILD.md) - Build instructions for all platforms
+- [Concurrency](docs/CONCURRENCY.md) - Thread safety and coordination approach
 - [Roadmap](docs/ROADMAP.md) - Development timeline and planned features
 - [Examples](docs/EXAMPLES.md) - Code examples and tutorials
-- [Quantum Fluctuation](docs/QUANTUM_FLUCTUATION.md) - Latest feature update design doc
 
 ## Building from Source
 

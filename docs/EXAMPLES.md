@@ -2,7 +2,7 @@
 
 [← Back to Documentation Index](DOCUMENTATION.md)
 
-This document serves as an index for the various examples demonstrating core Fabric Engine concepts and implementations. These examples showcase how to use the API to build components, handle events, manage lifecycle, and implement plugins.
+This document serves as an index for the various examples demonstrating core Fabric Engine concepts and implementations. These examples showcase how to use the API to build components, handle events, manage lifecycle, implement plugins, and use the Quantum Fluctuation features.
 
 ## Table of Contents
 - [Basic Component Structure](examples/basic_component.md)
@@ -11,10 +11,9 @@ This document serves as an index for the various examples demonstrating core Fab
 - [Plugin System Integration](examples/plugin_system.md)
 - [Type-Safe Property System](examples/property_system.md)
 - [Multi-Scale Perspective Framework](examples/perspective_framework.md)
+- [Quantum Fluctuation Integration](examples/quantum_fluctuation.md)
 
-## Overview
-
-The examples demonstrate the key components and concepts of the Fabric Engine architecture:
+## Core Framework Examples
 
 ### Basic Component Structure
 
@@ -51,6 +50,14 @@ Learn how to use the type-safe property system to store and retrieve component d
 See how the component system can be adapted to implement the perspective-fluid architecture where reality adapts based on the observer's perspective.
 
 [View Example →](examples/perspective_framework.md)
+
+## Quantum Fluctuation Examples
+
+### Quantum Fluctuation Integration
+
+This comprehensive example demonstrates the integration of all five Quantum Fluctuation systems: Command Pattern, Reactive Programming, Resource Management, Spatial System, and Temporal System.
+
+[View Example →](examples/quantum_fluctuation.md)
 
 ---
 

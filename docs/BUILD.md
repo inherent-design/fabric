@@ -55,13 +55,24 @@ To build Fabric Engine, you need the following tools and libraries:
   - Cocoa
   - WebKit
   - CoreAudio
+  - AudioToolbox
+  - CoreHaptics
+  - CoreVideo
   - Metal
+  - GameController
+  - IOKit
 
 ### Windows
 
 - Windows 7 or later
 - Visual Studio 2019 or later with C++ Desktop Development workload
 - Windows SDK 10.0.19041.0 or later
+- Required libraries:
+  - user32
+  - gdi32
+  - ole32
+  - shell32
+  - advapi32
 
 ### Linux
 
@@ -69,13 +80,16 @@ To build Fabric Engine, you need the following tools and libraries:
 - Required packages:
   ```bash
   # Ubuntu/Debian
-  sudo apt install build-essential cmake libwebkit2gtk-4.0-dev
+  sudo apt install build-essential cmake libwebkit2gtk-4.0-dev \
+    libx11-dev libxrandr-dev libxext-dev libxi-dev
 
   # Fedora
-  sudo dnf install gcc-c++ cmake webkit2gtk4.0-devel
+  sudo dnf install gcc-c++ cmake webkit2gtk4.0-devel \
+    libX11-devel libXrandr-devel libXext-devel libXi-devel
 
   # Arch Linux
-  sudo pacman -S base-devel cmake webkit2gtk
+  sudo pacman -S base-devel cmake webkit2gtk \
+    libx11 libxrandr libxext libxi
   ```
 
 ## Building Fabric
@@ -109,7 +123,7 @@ To build Fabric Engine, you need the following tools and libraries:
 The following options can be passed to CMake:
 
 - `-DCMAKE_BUILD_TYPE=<type>`: Set the build type (Debug, Release, RelWithDebInfo, MinSizeRel)
-- `-DENABLE_TESTS=ON/OFF`: Enable or disable tests (default: ON)
+- `-DFABRIC_BUILD_TESTS=ON/OFF`: Enable or disable tests (default: ON)
 - `-DCMAKE_INSTALL_PREFIX=<path>`: Set the installation path
 
 ### Using Ninja for Faster Builds
@@ -240,6 +254,14 @@ Fabric fetches the following dependencies automatically during the build process
 - **SDL3**: For cross-platform window management
 - **WebView**: For embedding web browser components
 - **Google Test**: For unit and integration testing
+
+## Core Components
+
+Fabric includes several core components with specific threading and synchronization requirements:
+
+- **CoordinatedGraph**: Intent-based thread-safe graph implementation (see [CONCURRENCY.md](CONCURRENCY.md))
+- **ResourceHub**: Centralized resource management using the CoordinatedGraph
+- **Event System**: Thread-safe event dispatch mechanism
 
 ## Custom Builds
 

@@ -224,7 +224,7 @@ private:
 /**
  * @brief A reference-counted handle to a resource
  * 
- * ResourceHandle provides safe access to resources managed by the ResourceManager.
+ * ResourceHandle provides safe access to resources managed by the ResourceHub.
  * It automatically maintains reference counting and ensures resources are loaded when needed.
  * 
  * @tparam T The resource type
@@ -241,9 +241,9 @@ public:
    * @brief Construct from a resource pointer
    * 
    * @param resource Pointer to the resource
-   * @param manager ResourceManager that owns the resource
+   * @param manager ResourceHub that owns the resource
    */
-  ResourceHandle(std::shared_ptr<T> resource, class ResourceManager* manager)
+  ResourceHandle(std::shared_ptr<T> resource, class ResourceHub* manager)
     : resource_(std::move(resource)), manager_(manager) {}
   
   /**
@@ -284,7 +284,7 @@ public:
   
 private:
   std::shared_ptr<T> resource_;
-  class ResourceManager* manager_ = nullptr;
+  class ResourceHub* manager_ = nullptr;
 };
 
 /**
@@ -996,36 +996,17 @@ private:
   bool shutdown_ = false;
 };
 
-/**
- * @brief Create a resource handle with convenience functions
- * 
- * @tparam T Resource type
- * @param typeId Type identifier
- * @param resourceId Resource identifier
- * @return ResourceHandle for the resource
- */
+// Forward declarations for convenience functions
+// Actual implementations are in ResourceHelpers.hh to avoid circular dependencies
 template <typename T>
-ResourceHandle<T> loadResource(const std::string& typeId, const std::string& resourceId) {
-  return ResourceManager::instance().load<T>(typeId, resourceId);
-}
+ResourceHandle<T> loadResource(const std::string& typeId, const std::string& resourceId);
 
-/**
- * @brief Load a resource asynchronously with convenience functions
- * 
- * @tparam T Resource type
- * @param typeId Type identifier
- * @param resourceId Resource identifier
- * @param callback Function to call when the resource is loaded
- * @param priority Loading priority
- */
 template <typename T>
 void loadResourceAsync(
   const std::string& typeId,
   const std::string& resourceId,
   std::function<void(ResourceHandle<T>)> callback,
-  ResourcePriority priority = ResourcePriority::Normal
-) {
-  ResourceManager::instance().loadAsync<T>(typeId, resourceId, priority, callback);
-}
+  ResourcePriority priority
+);
 
 } // namespace Fabric

@@ -693,6 +693,32 @@ public:
     return result;
   }
   
+  // Combine this transform with another, resulting in a new transform
+  Transform<T> combine(const Transform<T>& other) const {
+    Transform<T> result;
+    
+    // Simple combination for position, scale, and rotation
+    // Element-wise multiplication for scale
+    Vec3 scaledPos = Vec3(
+      other.position_.x * this->scale_.x,
+      other.position_.y * this->scale_.y,
+      other.position_.z * this->scale_.z
+    );
+    result.position_ = this->position_ + this->rotation_.rotateVector(scaledPos);
+    
+    // Element-wise multiplication for scale
+    result.scale_ = Vec3(
+      this->scale_.x * other.scale_.x,
+      this->scale_.y * other.scale_.y,
+      this->scale_.z * other.scale_.z
+    );
+    
+    result.rotation_ = this->rotation_ * other.rotation_;
+    result.dirty_ = true;
+    
+    return result;
+  }
+  
 private:
   Vec3 position_;
   Quat rotation_;
@@ -784,6 +810,28 @@ public:
    */
   const std::vector<std::unique_ptr<SceneNode>>& getChildren() const { 
     return children_; 
+  }
+  
+  /**
+   * @brief Get the number of child nodes
+   * 
+   * @return Number of children
+   */
+  size_t getChildCount() const {
+    return children_.size();
+  }
+  
+  /**
+   * @brief Get a child node by index
+   * 
+   * @param index Index of the child to get
+   * @return Pointer to the child node, or nullptr if index is out of range
+   */
+  SceneNode* getChild(size_t index) const {
+    if (index < children_.size()) {
+      return children_[index].get();
+    }
+    return nullptr;
   }
   
   /**

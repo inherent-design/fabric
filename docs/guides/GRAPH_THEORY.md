@@ -90,19 +90,19 @@ Fabric's graph implementation addresses these challenges through:
 
 Fabric implements these concepts through:
 
-1. **`ConcurrentGraph<T>`**: Thread-safe directed graph with fine-grained locking
+1. **`CoordinatedGraph<T>`**: Thread-safe directed graph with intent-based locking
    ```cpp
    template <typename T, typename KeyType = std::string>
-   class ConcurrentGraph {
-       // Node-level locks enable maximum parallelism
-       // Thread-safe traversal and modification operations
+   class CoordinatedGraph {
+       // Intent-based locks enable maximum parallelism with awareness
+       // Thread-safe traversal and modification operations with lock intent tracking
    };
    ```
 
-2. **`GraphResourceManager`**: Resource system built on the concurrent graph
+2. **`ResourceHub`**: Resource system built on the coordinated graph
    ```cpp
-   class GraphResourceManager {
-       ConcurrentGraph<std::shared_ptr<Resource>> resourceGraph_;
+   class ResourceHub {
+       CoordinatedGraph<std::shared_ptr<Resource>> resourceGraph_;
        // Graph-based dependency tracking and memory management
    };
    ```

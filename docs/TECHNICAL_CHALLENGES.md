@@ -49,6 +49,8 @@ This document outlines the key technical challenges and implementation considera
 - **Thread-Safe Perspective Shifting**: Ensure thread safety during scope transitions
 - **Worker Pools**: Implement thread pools for handling detail loading/unloading
 - **Lock-Free Algorithms**: Use atomic operations for performance-critical sections
+- **Deadlock Prevention**: Using fine-grained locking with timeout protection to prevent deadlocks
+- **Graph-Based Concurrency**: Implement concurrent graph structures for dependencies with clean lock hierarchies
 
 ### Lazy Instantiation
 - **On-Demand Loading**: Create detailed properties only when a quantum enters the mesosphere

@@ -180,7 +180,7 @@ This system handles loading, caching, and lifecycle management of assets across 
 
 ```
 ┌────────────────────────────┐
-│ ResourceManager            │
+│ ResourceHub                │
 ├────────────────────────────┤
 │ +load<T>(id: string): T    │
 │ +unload(id: string): bool  │
@@ -217,6 +217,7 @@ This system handles loading, caching, and lifecycle management of assets across 
 
 ### Key Features
 
+- **Intent-Based Locking**: Uses the Quantum Fluctuation concurrency model
 - **Asynchronous Loading**: Resources load without blocking the main thread
 - **Memory-Aware Caching**: Automatically manages memory pressure
 - **Priority-Based Loading**: Important resources load first
@@ -225,7 +226,7 @@ This system handles loading, caching, and lifecycle management of assets across 
 
 ### Implementation Approach
 
-The resource system will use a flexible factory pattern with template specialization for each resource type. Background threads will handle loading while maintaining a memory budget.
+The resource system uses CoordinatedGraph with intent-based locking, complemented by a flexible factory pattern with template specialization for each resource type. Background threads handle loading while maintaining a memory budget.
 
 ```cpp
 template <typename T>
@@ -239,7 +240,7 @@ public:
     auto ptr = resource.lock();
     if (!ptr) {
       // Try to reload from cache
-      ptr = ResourceManager::instance().load<T>(resourceId);
+      ptr = ResourceHub::instance().load<T>(resourceId);
     }
     return ptr.get();
   }

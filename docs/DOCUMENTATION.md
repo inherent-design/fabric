@@ -10,10 +10,10 @@ Welcome to the Fabric Engine documentation. This guide serves as a central hub f
 |----------|-------------|
 | [Architecture](ARCHITECTURE.md) | Detailed architecture of the Fabric Engine |
 | [Build Guide](BUILD.md) | Instructions for building the project on different platforms |
+| [Concurrency](CONCURRENCY.md) | Thread safety and coordination approach |
 | [Testing Guide](TESTING.md) | Overview of the testing framework and procedures |
 | [Roadmap](ROADMAP.md) | Project roadmap and feature implementation timeline |
 | [Technical Challenges](TECHNICAL_CHALLENGES.md) | Key technical challenges and implementation considerations |
-| [Quantum Fluctuation](QUANTUM_FLUCTUATION.md) | Design document for the Quantum Fluctuation update |
 | [Contributing](CONTRIBUTING.md) | Guidelines for contributing to the project |
 | [Examples](EXAMPLES.md) | Code examples demonstrating key concepts |
 
@@ -37,11 +37,11 @@ Fabric Engine consists of several key architectural components:
   - [Plugin Architecture](ARCHITECTURE.md#core-components)
 
 - **Quantum Fluctuation Update**: Advanced perspective-fluid features
-  - [Command Pattern & Action System](QUANTUM_FLUCTUATION.md#1-command-pattern--action-system)
-  - [Reactive Programming Model](QUANTUM_FLUCTUATION.md#2-reactive-programming-model)
-  - [Resource Management Framework](QUANTUM_FLUCTUATION.md#3-resource-management-framework)
-  - [Scale-Aware Scene System](QUANTUM_FLUCTUATION.md#4-spatial-primitives--scene-graph)
-  - [Temporal Dimension System](QUANTUM_FLUCTUATION.md#5-temporal-dimension-system)
+  - [Command Pattern & Action System](examples/quantum_fluctuation.md)
+  - [Reactive Programming Model](examples/quantum_fluctuation.md)
+  - [Resource Management with CoordinatedGraph](CONCURRENCY.md)
+  - [Scale-Aware Scene System](examples/quantum_fluctuation.md)
+  - [Temporal Dimension System](examples/quantum_fluctuation.md)
 
 - **External Integrations**:
   - SDL3 for windowing and rendering
@@ -59,7 +59,7 @@ Fabric Engine consists of several key architectural components:
 | Guide | Description |
 |-------|-------------|
 | [Graph Theory](guides/GRAPH_THEORY.md) | Explores how graph theory principles apply to resource management |
-| [Concurrency](guides/CONCURRENCY.md) | Details the concurrency strategies implemented in Fabric |
+| [Concurrency](CONCURRENCY.md) | Details the intent-based concurrency strategy in Fabric |
 | [Resource Management](guides/RESOURCE_MANAGEMENT.md) | Practical guide to the graph-based resource management system |
 | [Von Neumann Graph Processing](guides/VON_NEUMANN_GRAPHS.md) | Theoretical analysis of graph algorithms on classical CPU architectures |
 | [Implementation Patterns](guides/IMPLEMENTATION_PATTERNS.md) | Practical patterns for working with concurrent graph systems |

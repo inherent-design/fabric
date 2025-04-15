@@ -1,8 +1,8 @@
-# Implementation Patterns for Concurrent Graph Systems
+# Implementation Patterns for Coordinated Graph Systems
 
 ## Introduction
 
-This document provides practical implementation patterns for working with Fabric's concurrent graph-based systems. These patterns represent battle-tested approaches that balance correctness, performance, and code clarity.
+This document provides practical implementation patterns for working with Fabric's coordinated graph-based systems. These patterns represent battle-tested approaches that balance correctness, performance, and code clarity.
 
 ## Node Design Patterns
 
@@ -173,16 +173,16 @@ When removing nodes, consider their dependencies:
 
 ```cpp
 bool canSafelyEvict(const Key& key) {
-    // Check if node exists
-    if (!hasNode(key)) return false;
+    // Check if node exists with Read intent
+    if (!hasNode(key, LockIntent::Read)) return false;
     
     // Check for dependents
-    auto dependents = getInEdges(key);
+    auto dependents = getInEdges(key, LockIntent::Read);
     if (!dependents.empty()) return false;
     
     // Check for external references
-    auto node = getNode(key);
-    if (!node || node.use_count() > 1) return false;
+    auto nodeResult = getNode(key, LockIntent::Read);
+    if (!nodeResult.hasNode() || nodeResult.node().use_count() > 1) return false;
     
     return true;
 }
@@ -195,6 +195,52 @@ bool canSafelyEvict(const Key& key) {
 - When safely unloading components from a running system
 
 ## Concurrency Control Patterns
+
+### Timeout Protected Locking
+
+To prevent deadlocks in production code:
+
+```cpp
+// Always use timeouts to avoid indefinite blocking
+std::unique_lock<std::shared_mutex> getLockWithTimeout(std::shared_mutex& mutex) {
+    // First try immediate acquisition
+    std::unique_lock<std::shared_mutex> lock(mutex, std::try_to_lock);
+    if (!lock.owns_lock()) {
+        // If immediate acquisition fails, try with a timeout
+        if (!mutex.try_lock_for(std::chrono::milliseconds(100))) {
+            // Return a lock that doesn't own the mutex
+            return std::unique_lock<std::shared_mutex>(mutex, std::defer_lock);
+        }
+        // Create a lock that adopts the already-acquired mutex
+        return std::unique_lock<std::shared_mutex>(mutex, std::adopt_lock);
+    }
+    return lock;
+}
+
+// Usage
+bool updateNodeSafely(const Key& key, const T& newValue) {
+    auto node = getNode(key);
+    if (!node) return false;
+    
+    auto lock = getLockWithTimeout(node->mutex_);
+    if (!lock.owns_lock()) {
+        // Handle lock timeout - log and return gracefully
+        Logger::warning("Lock timeout on node " + key);
+        return false;
+    }
+    
+    // Proceed with update
+    node->setValue(newValue);
+    return true;
+}
+```
+
+#### When to Use
+
+- In production code where deadlocks must be avoided at all costs
+- When it's better to fail gracefully than hang indefinitely
+- For operations that could potentially encounter lock contention
+- In systems where multiple lock acquisitions can occur
 
 ### Multi-Phase Locking
 

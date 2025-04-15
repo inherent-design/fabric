@@ -9,8 +9,8 @@ The Fabric Engine employs a sophisticated, graph-based approach to resource mana
 Fabric's resource management consists of three primary components:
 
 1. **Resource Base System**: Defines the common interface and lifecycle
-2. **ConcurrentGraph**: Provides the thread-safe dependency tracking structure
-3. **GraphResourceManager**: Ties everything together with practical workflows
+2. **CoordinatedGraph**: Provides the thread-safe dependency tracking structure with intent-based locking
+3. **ResourceHub**: Ties everything together with practical workflows
 
 These components create a unified system for resource loading, dependency tracking, and memory management that's both thread-safe and highly efficient.
 
@@ -91,14 +91,14 @@ This handle system provides:
 - Null safety with bool conversion
 - Convenient arrow operator access
 
-## ConcurrentGraph Integration
+## CoordinatedGraph Integration
 
-The GraphResourceManager uses a concurrent graph to track dependencies:
+The ResourceHub uses a coordinated graph to track dependencies with intent-based locking:
 
 ```cpp
-class GraphResourceManager {
+class ResourceHub {
 private:
-    ConcurrentGraph<std::shared_ptr<Resource>> resourceGraph_;
+    CoordinatedGraph<std::shared_ptr<Resource>> resourceGraph_;
     // ...
 };
 ```
@@ -120,7 +120,7 @@ This structure enables:
 ### Synchronous Loading
 
 ```cpp
-auto textureHandle = GraphResourceManager::instance()
+auto textureHandle = ResourceHub::instance()
     .load<TextureResource>("texture", "textures/grass.png");
 
 if (textureHandle) {
@@ -132,7 +132,7 @@ if (textureHandle) {
 ### Asynchronous Loading
 
 ```cpp
-GraphResourceManager::instance().loadAsync<TextureResource>(
+ResourceHub::instance().loadAsync<TextureResource>(
     "texture", "textures/background.jpg",
     ResourcePriority::Low,
     [](ResourceHandle<TextureResource> handle) {
@@ -170,7 +170,7 @@ logger.info("Evicted {} resources to stay within budget", evicted);
 
 ### Eviction Strategy
 
-The GraphResourceManager uses a sophisticated LRU eviction algorithm:
+The ResourceHub uses a sophisticated LRU eviction algorithm:
 
 1. Resources with dependents are never evicted
 2. Resources with external references are never evicted
@@ -197,7 +197,7 @@ for (const auto& id : allResourceIds) {
 
 ### Worker Thread Pool
 
-The GraphResourceManager uses a configurable thread pool for background loading:
+The ResourceHub uses a configurable thread pool for background loading:
 
 ```cpp
 // Configure worker threads
