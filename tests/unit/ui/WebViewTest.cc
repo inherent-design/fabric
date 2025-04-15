@@ -3,6 +3,9 @@
 #include <gtest/gtest.h>
 #include <string>
 
+// Only compile the WebView tests when WebView is enabled
+#if defined(FABRIC_USE_WEBVIEW)
+
 namespace Fabric {
 namespace Tests {
 
@@ -51,3 +54,19 @@ TEST_F(WebViewTest, SetHtml) {
 
 } // namespace Tests
 } // namespace Fabric
+
+#else
+
+// Provide a placeholder test when WebView is disabled
+namespace Fabric {
+namespace Tests {
+
+TEST(WebViewTest, Disabled) {
+    // This test only verifies that the test suite builds when WebView is disabled
+    SUCCEED() << "WebView is disabled, tests skipped";
+}
+
+} // namespace Tests
+} // namespace Fabric
+
+#endif

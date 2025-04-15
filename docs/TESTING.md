@@ -249,6 +249,47 @@ protected:
 };
 ```
 
+#### Specialized Test Fixtures
+
+For testing complex components like the resource management system that involve worker threads or concurrency, we use specialized fixtures that handle setup and cleanup of these resources:
+
+```cpp
+// A specialized test fixture for resource manager tests that need deterministic behavior
+class ResourceDeterministicTest : public ::testing::Test {
+protected:
+    void SetUp() override {
+        // Register test factory
+        ResourceFactory::registerType<TestResource>("test", TestResourceFactory::create);
+        
+        // Disable worker threads for deterministic testing
+        ResourceManager::instance().disableWorkerThreadsForTesting();
+        
+        // Start with a large budget
+        ResourceManager::instance().setMemoryBudget(std::numeric_limits<size_t>::max());
+    }
+    
+    void TearDown() override {
+        // Clean up resources
+        ResourceManager& manager = ResourceManager::instance();
+        
+        // Restore default settings
+        manager.setMemoryBudget(std::numeric_limits<size_t>::max());
+        manager.enforceMemoryBudget();
+        
+        // Restart worker threads for other tests
+        manager.restartWorkerThreadsAfterTesting();
+    }
+};
+```
+
+This specialized fixture handles:
+- Registering necessary factories
+- Disabling worker threads for deterministic testing
+- Setting up test conditions
+- Cleaning up resources after tests complete
+- Restoring worker threads for subsequent tests
+```
+
 ## Running Tests
 
 Tests can be run using the following commands from the build directory:
@@ -266,8 +307,29 @@ Tests can be run using the following commands from the build directory:
 # Run a specific test
 ./bin/UnitTests --gtest_filter=LoggingTest.LogInfo
 
+# Run all tests matching a pattern
+./bin/UnitTests --gtest_filter=ResourceDeterministicTest*
+
 # Run all tests with verbose output
 ./bin/UnitTests --gtest_output=verbose
+
+# Run tests with custom output format
+./bin/UnitTests --gtest_color=yes --gtest_print_time=true
+```
+
+### Using Test Fixtures to Group Tests
+
+When running tests, you can select all tests that use a specific fixture by filtering with the fixture name:
+
+```bash
+# Run all deterministic resource tests
+./bin/UnitTests --gtest_filter="ResourceDeterministicTest*"
+
+# Run a combination of test fixtures
+./bin/UnitTests --gtest_filter="ResourceTest*:ResourceDeterministicTest*"
+
+# Exclude specific tests
+./bin/UnitTests --gtest_filter="ResourceTest*-ResourceTest.ResourceEviction"
 ```
 
 ## Adding New Tests

@@ -1,7 +1,13 @@
 #pragma once
 
+// Check if the FABRIC_USE_WEBVIEW macro is defined
+#if defined(FABRIC_USE_WEBVIEW)
 #include "webview/webview.h"
+#endif
+
 #include <string>
+#include <memory>
+#include <functional>
 
 namespace Fabric {
 
@@ -42,7 +48,11 @@ public:
    * @param hint Size hint (WEBVIEW_HINT_NONE, WEBVIEW_HINT_MIN,
    * WEBVIEW_HINT_MAX, WEBVIEW_HINT_FIXED)
    */
+#if defined(FABRIC_USE_WEBVIEW)
   void setSize(int width, int height, webview_hint_t hint = WEBVIEW_HINT_NONE);
+#else
+  void setSize(int width, int height, int hint = 0);
+#endif
 
   /**
    * @brief Navigate to a URL
@@ -93,7 +103,9 @@ protected:
   std::string html;
 
 private:
+#if defined(FABRIC_USE_WEBVIEW)
   std::unique_ptr<webview::webview> webview_;
+#endif
 };
 
 } // namespace Fabric

@@ -54,6 +54,16 @@ Fabric Engine consists of several key architectural components:
 - [Testing Procedures](TESTING.md#testing-philosophy)
 - [Build Process](BUILD.md#build-process)
 
+## Technical Guides
+
+| Guide | Description |
+|-------|-------------|
+| [Graph Theory](guides/GRAPH_THEORY.md) | Explores how graph theory principles apply to resource management |
+| [Concurrency](guides/CONCURRENCY.md) | Details the concurrency strategies implemented in Fabric |
+| [Resource Management](guides/RESOURCE_MANAGEMENT.md) | Practical guide to the graph-based resource management system |
+| [Von Neumann Graph Processing](guides/VON_NEUMANN_GRAPHS.md) | Theoretical analysis of graph algorithms on classical CPU architectures |
+| [Implementation Patterns](guides/IMPLEMENTATION_PATTERNS.md) | Practical patterns for working with concurrent graph systems |
+
 ## Core Concepts
 
 Fabric Engine introduces several unique concepts:

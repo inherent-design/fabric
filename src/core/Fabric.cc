@@ -34,11 +34,19 @@ int main(int argc, char *argv[]) {
       return 0;
     }
 
+#ifdef FABRIC_USE_WEBVIEW
     // Initialize WebView
     Fabric::WebView webview("Fabric", 800, 600, true);
     webview.setHTML("<html><body><h1>Hello from Fabric!</h1><p>Version: " +
                     std::string(Fabric::APP_VERSION) + "</p></body></html>");
     webview.run();
+#else
+    // WebView is disabled, run in console mode
+    std::cout << "WebView is disabled, running in console mode." << std::endl;
+    std::cout << "Fabric Engine " << Fabric::APP_VERSION << " initialized successfully." << std::endl;
+    std::cout << "Press Enter to exit..." << std::endl;
+    std::cin.get();
+#endif
 
     return 0;
   } catch (const std::exception &e) {

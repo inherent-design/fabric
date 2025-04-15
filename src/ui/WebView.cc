@@ -2,6 +2,9 @@
 #include "fabric/utils/Logging.hh"
 #include <memory>
 
+// The FABRIC_USE_WEBVIEW macro is now defined by CMake in the compilation flags
+// when the FABRIC_USE_WEBVIEW option is enabled
+
 namespace Fabric {
 
 WebView::WebView(const std::string &title, int width, int height, bool debug,
