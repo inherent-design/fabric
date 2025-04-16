@@ -1,13 +1,11 @@
 #pragma once
 
+#include "fabric/core/Types.hh"
 #include <any>
 #include <functional>
-#include <memory>
-#include <string>
 #include <unordered_map>
 #include <vector>
 #include <mutex>
-#include <variant>
 
 namespace Fabric {
 
@@ -22,16 +20,10 @@ public:
   /**
    * @brief Supported event data value types
    * 
-   * This variant defines all types that can be stored in event data.
-   * To add support for additional types, extend this variant definition.
+   * This uses the common Variant type defined in Types.hh.
+   * To add support for additional types, extend the Variant definition.
    */
-  using DataValue = std::variant<
-    bool,
-    int,
-    float,
-    double,
-    std::string
-  >;
+  using DataValue = Variant;
   
   /**
    * @brief Event constructor

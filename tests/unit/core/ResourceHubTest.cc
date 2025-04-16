@@ -103,6 +103,9 @@ TEST_F(ResourceHubMinimalTest, ResourceFactoryCreate) {
 TEST_F(ResourceHubMinimalTest, BasicResourceHubLoad) {
   auto& hub = ResourceHub::instance();
   
+  // Explicitly verify worker threads are disabled before proceeding
+  ASSERT_EQ(hub.getWorkerThreadCount(), 0) << "Worker threads should be disabled for this test";
+  
   // Load resource through hub
   auto handle = hub.load<MinimalTestResource>("TestResource", "hubTest");
   

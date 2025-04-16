@@ -25,7 +25,7 @@ bool ArgumentParser::hasArgument(const std::string &name) const {
 }
 
 // Get argument value
-const std::optional<Token>
+const OptionalToken
 ArgumentParser::getArgument(const std::string &name) const {
   auto it = arguments.find(name);
   if (it != arguments.end()) {
@@ -34,7 +34,7 @@ ArgumentParser::getArgument(const std::string &name) const {
   return std::nullopt;
 }
 
-const std::map<std::string, Token> &ArgumentParser::getArguments() const {
+const TokenMap &ArgumentParser::getArguments() const {
   return arguments;
 }
 
@@ -124,8 +124,7 @@ void ArgumentParser::parse(const std::string &args) {
   }
 }
 
-bool ArgumentParser::validateArgs(
-    const std::map<std::string, std::pair<TokenType, bool>> &options) {
+bool ArgumentParser::validateArgs(const TokenTypeOptionsMap &options) {
   bool valid = true;
   std::vector<std::string> missingArgs;
 
@@ -160,7 +159,7 @@ bool ArgumentParser::validateArgs(
 ArgumentParserBuilder &ArgumentParserBuilder::addOption(const std::string &name,
                                                         TokenType type,
                                                         bool optional) {
-  options[name] = {type, optional};
+  options[name] = std::make_pair(type, optional);
   return *this;
 }
 

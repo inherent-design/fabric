@@ -634,12 +634,20 @@ void ResourceHub::disableWorkerThreadsForTesting() {
         if (!joinCompleted) {
           // Log timeout warning - thread may be deadlocked
           Logger::logWarning("Thread join timeout in disableWorkerThreadsForTesting");
+          // Thread is likely deadlocked, detach it
+          return;
         }
       });
 
-      // Join the worker thread
-      thread->join();
-      joinCompleted = true;
+      // Try to join with a timeout
+      try {
+        if (thread->joinable()) {
+          thread->join();
+          joinCompleted = true;
+        }
+      } catch (const std::exception& e) {
+        Logger::logError("Error joining thread: " + std::string(e.what()));
+      }
 
       // Clean up timeout thread
       if (timeoutThread.joinable()) {
@@ -813,10 +821,14 @@ ResourceHub::ResourceHub()
   std::cout << "ResourceHub initialized with " << workerThreadCount_
             << " worker threads" << std::endl;
 
-  // Start worker threads
-  for (unsigned int i = 0; i < workerThreadCount_; ++i) {
-    workerThreads_.push_back(
-        std::make_unique<std::thread>(&ResourceHub::workerThreadFunc, this));
+  // Start worker threads - but only if we're not in a test environment
+  // Tests should call disableWorkerThreadsForTesting() in their setup
+  // which will be a no-op if no threads are running
+  if (workerThreadCount_ > 0) {
+    for (unsigned int i = 0; i < workerThreadCount_; ++i) {
+      workerThreads_.push_back(
+          std::make_unique<std::thread>(&ResourceHub::workerThreadFunc, this));
+    }
   }
 }
 

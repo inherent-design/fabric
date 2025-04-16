@@ -1,9 +1,9 @@
 #pragma once
 
 #include "fabric/parser/SyntaxTree.hh"
+#include "fabric/core/Types.hh"
 #include <map>
 #include <optional>
-#include <variant>
 
 namespace Fabric {
 // ArgumentParser
@@ -14,8 +14,8 @@ public:
   std::string getErrorMsg() const { return errorMsg; }
   bool isValid() const { return valid; }
 
-  const std::map<std::string, Token> &getArguments() const;
-  const std::optional<Token> getArgument(const std::string &name) const;
+  const TokenMap &getArguments() const;
+  const OptionalToken getArgument(const std::string &name) const;
 
   // Add a command-line argument definition
   void addArgument(const std::string &name, const std::string &description,
@@ -27,13 +27,12 @@ public:
   void parse(int argc, char *argv[]);
   void parse(const std::string &args);
 
-  bool validateArgs(
-      const std::map<std::string, std::pair<TokenType, bool>> &options);
+  bool validateArgs(const TokenTypeOptionsMap &options);
 
 private:
-  std::map<std::string, Token> arguments;
-  std::map<std::string, std::pair<TokenType, bool>> availableArgs;
-  std::map<std::string, std::string> argumentDescriptions;
+  TokenMap arguments;
+  TokenTypeOptionsMap availableArgs;
+  StringStringMap argumentDescriptions;
 
   std::string errorMsg;
   bool valid = true;
@@ -47,7 +46,7 @@ private:
 // Builder pattern for ArgumentParser
 class ArgumentParserBuilder {
 public:
-  const std::map<std::string, std::pair<TokenType, bool>> &getOptions() const {
+  const TokenTypeOptionsMap &getOptions() const {
     return options;
   }
 
@@ -56,6 +55,6 @@ public:
   ArgumentParser build() const;
 
 private:
-  std::map<std::string, std::pair<TokenType, bool>> options;
+  TokenTypeOptionsMap options;
 };
 } // namespace Fabric

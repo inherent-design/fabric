@@ -1,11 +1,8 @@
 #pragma once
 
-#include <string>
-#include <variant>
+#include "fabric/core/Types.hh"
 
 namespace Fabric {
-
-typedef std::variant<std::nullptr_t, bool, int, double, std::string> Variant;
 
 // Enum for token types with payloads for literals
 enum class TokenType {
