@@ -282,6 +282,14 @@ public:
     return resource_ ? resource_->getId() : "";
   }
   
+  /**
+   * @brief Reset the resource handle, releasing the reference
+   */
+  void reset() {
+    resource_.reset();
+    manager_ = nullptr;
+  }
+  
 private:
   std::shared_ptr<T> resource_;
   class ResourceHub* manager_ = nullptr;

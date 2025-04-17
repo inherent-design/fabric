@@ -2,6 +2,7 @@
 
 #include "fabric/core/Resource.hh" 
 #include "fabric/utils/CoordinatedGraph.hh"
+#include "fabric/utils/Logging.hh"
 #include <any>
 #include <atomic>
 #include <chrono>
@@ -19,6 +20,11 @@
 
 namespace Fabric {
 
+// Forward declarations
+namespace Test {
+  class ResourceHubTestHelper;
+}
+
 /**
  * @brief Central hub for managing resources with dependency tracking
  *
@@ -27,6 +33,9 @@ namespace Fabric {
  * and asynchronous resource loading options.
  */
 class ResourceHub {
+  // Allow test helper to access protected members
+  friend class Fabric::Test::ResourceHubTestHelper;
+  
 public:
   /**
    * @brief Get the singleton instance
@@ -49,92 +58,221 @@ public:
     static_assert(std::is_base_of<Resource, T>::value,
                   "T must be derived from Resource");
 
-    std::shared_ptr<Resource> resource;
-
-    // First, check if the resource exists in the graph
-    auto resourceNode = resourceGraph_.getNode(resourceId);
-
-    if (!resourceNode) {
-      // Resource doesn't exist, create it
-      resource = ResourceFactory::create(typeId, resourceId);
+    // Robust implementation following best practices from docs/guides/IMPLEMENTATION_PATTERNS.md
+    // Using the Copy-Then-Process pattern and avoiding nested locks
+    
+    const int LOAD_TIMEOUT_MS = 500; // 500ms timeout to prevent UI hangs
+    const int PHASE_TIMEOUT_MS = 150; // Each phase gets shorter timeout
+    auto startTime = std::chrono::steady_clock::now();
+    
+    // Timeout checker function
+    auto isTimedOut = [&startTime, LOAD_TIMEOUT_MS]() -> bool {
+      return std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::steady_clock::now() - startTime)
+                .count() > LOAD_TIMEOUT_MS;
+    };
+    
+    try {
+      // =================================================================
+      // Phase 1: Resource Lookup or Creation - Highly resilient to failures
+      // =================================================================
+      std::shared_ptr<Resource> resource;
+      bool createdNewResource = false;
+      
+      // First attempt to get existing resource
+      if (!isTimedOut()) {
+        try {
+          // Use a very short operation timeout to avoid blocking
+          bool nodeExists = false;
+          try {
+            nodeExists = resourceGraph_.hasNode(resourceId);
+          } catch (...) {
+            // Silently continue with creation flow if this fails
+          }
+          
+          if (nodeExists) {
+            try {
+              auto node = resourceGraph_.getNode(resourceId, PHASE_TIMEOUT_MS / 3);
+              if (node) {
+                auto nodeLock = node->tryLock(
+                    CoordinatedGraph<std::shared_ptr<Resource>>::LockIntent::Read,
+                    PHASE_TIMEOUT_MS / 3);
+                
+                if (nodeLock && nodeLock->isLocked()) {
+                  resource = nodeLock->getNode()->getData();
+                  nodeLock->release(); // Important: Release lock after getting data
+                }
+              }
+            } catch (...) {
+              // Silently continue if this fails
+            }
+          }
+        } catch (...) {
+          // Silently continue with creation flow if this fails
+        }
+      }
+      
+      // If we still don't have a resource by this point, create a new one
+      if (!resource && !isTimedOut()) {
+        try {
+          // Create new resource
+          resource = ResourceFactory::create(typeId, resourceId);
+          if (resource) {
+            createdNewResource = true;
+            
+            // Try to add resource to graph with strict timeout
+            try {
+              bool added = resourceGraph_.addNode(resourceId, resource);
+              
+              // If adding failed, the node might already exist
+              if (!added) {
+                // Handle the case where someone else added the node first
+                try {
+                  auto node = resourceGraph_.getNode(resourceId, PHASE_TIMEOUT_MS / 3);
+                  if (node) {
+                    auto nodeLock = node->tryLock(
+                        CoordinatedGraph<std::shared_ptr<Resource>>::LockIntent::Read,
+                        PHASE_TIMEOUT_MS / 3);
+                        
+                    if (nodeLock && nodeLock->isLocked()) {
+                      // Use the existing resource instead
+                      resource = nodeLock->getNode()->getData();
+                      createdNewResource = false;
+                      nodeLock->release();
+                    }
+                  }
+                } catch (...) {
+                  // If we can't get the node someone else added, keep our locally created one
+                  // We just won't be able to add it to the graph
+                }
+              }
+            } catch (...) {
+              // If graph operations fail, we still have the resource locally
+              // Just continue with local instance
+              Logger::logWarning("Failed to add resource to graph: " + resourceId);
+            }
+          } else {
+            Logger::logError("Failed to create resource: " + resourceId);
+          }
+        } catch (const std::exception &e) {
+          Logger::logError("Exception creating resource: " + std::string(e.what()));
+        } catch (...) {
+          Logger::logError("Unknown exception creating resource");
+        }
+      }
+      
+      // Return early if we have no resource or timed out
       if (!resource) {
-        // Failed to create resource
+        if (isTimedOut()) {
+          Logger::logWarning("Timed out in ResourceHub::load during resource lookup for " + resourceId);
+        } else {
+          Logger::logError("Could not create or retrieve resource: " + resourceId);
+        }
         return ResourceHandle<T>();
       }
-
-      // Add to graph
-      bool added = resourceGraph_.addNode(resourceId, resource);
-      if (!added) {
-        // Node may have been added by another thread, try to get it again
-        resourceNode = resourceGraph_.getNode(resourceId);
-        if (resourceNode) {
-          // Get the resource from the node
-          auto nodeLock = resourceNode->tryLock(
-              CoordinatedGraph<std::shared_ptr<Resource>>::LockIntent::Read);
-          if (nodeLock && nodeLock->isLocked()) {
-            resource = nodeLock->getNode()->getData();
+      
+      // =================================================================
+      // Phase 2: Resource Loading - With proper timeout handling
+      // =================================================================
+      if (resource->getState() != ResourceState::Loaded && !isTimedOut()) {
+        auto loadTimeoutMs = PHASE_TIMEOUT_MS;
+        auto loadStartTime = std::chrono::steady_clock::now();
+        
+        auto loadTimedOut = [&loadStartTime, loadTimeoutMs]() -> bool {
+          return std::chrono::duration_cast<std::chrono::milliseconds>(
+                    std::chrono::steady_clock::now() - loadStartTime)
+                    .count() > loadTimeoutMs;
+        };
+        
+        // Load the resource with a separate timeout
+        try {
+          // Create a future with timeout for loading
+          std::promise<bool> loadPromise;
+          auto loadFuture = loadPromise.get_future();
+          
+          // Create a thread to load the resource
+          std::thread loadThread([&resource, &loadPromise]() {
+            try {
+              bool result = resource->load();
+              loadPromise.set_value(result);
+            } catch (...) {
+              try {
+                loadPromise.set_value(false);
+              } catch (...) {
+                // Promise might already be satisfied
+              }
+            }
+          });
+          
+          // Detach the thread to avoid blocking
+          loadThread.detach();
+          
+          // Wait for the future with timeout
+          bool loadSuccess = false;
+          
+          if (loadFuture.wait_for(std::chrono::milliseconds(loadTimeoutMs)) == 
+              std::future_status::ready) {
+            try {
+              loadSuccess = loadFuture.get();
+            } catch (...) {
+              loadSuccess = false;
+            }
           } else {
-            // Could not lock the node, return empty handle
-            return ResourceHandle<T>();
+            Logger::logWarning("Resource loading timed out for: " + resourceId);
+            loadSuccess = false;
           }
+          
+          if (!loadSuccess) {
+            Logger::logWarning("Failed to load resource: " + resourceId);
+            // Continue anyway - we'll return the handle even if loading failed
+          }
+          
+          // Update access time if needed and if we haven't timed out
+          if ((createdNewResource || loadSuccess) && !loadTimedOut() && !isTimedOut()) {
+            try {
+              auto node = resourceGraph_.getNode(resourceId, PHASE_TIMEOUT_MS / 3);
+              if (node) {
+                node->touch();
+              }
+            } catch (...) {
+              // Failure to update access time is not critical
+            }
+          }
+        } catch (const std::exception &e) {
+          Logger::logError("Exception during resource loading: " + std::string(e.what()));
+        } catch (...) {
+          Logger::logError("Unknown exception during resource loading");
+        }
+      }
+      
+      // =================================================================
+      // Phase 3: Handle Creation
+      // =================================================================
+      try {
+        // Even if loading failed, return a handle to the resource
+        // The client can check the resource state
+        if (!isTimedOut()) {
+          return ResourceHandle<T>(std::static_pointer_cast<T>(resource),
+                                  &ResourceHub::instance());
         } else {
-          // Something went wrong, return empty handle
+          Logger::logWarning("Timed out before returning resource handle: " + resourceId);
           return ResourceHandle<T>();
         }
-      } else {
-        // Get the node we just added
-        resourceNode = resourceGraph_.getNode(resourceId);
-      }
-    } else {
-      // Get the resource from the node under a lock
-      auto nodeLock = resourceNode->tryLock(
-          CoordinatedGraph<std::shared_ptr<Resource>>::LockIntent::Read);
-      if (nodeLock && nodeLock->isLocked()) {
-        resource = nodeLock->getNode()->getData();
-      } else {
-        // Could not lock the node, return empty handle
+      } catch (const std::exception &e) {
+        Logger::logError("Exception creating resource handle: " + std::string(e.what()));
         return ResourceHandle<T>();
       }
-    }
-
-    if (!resource) {
-      // Something went wrong
+                              
+    } catch (const std::exception &e) {
+      Logger::logError("Exception in ResourceHub::load() for " + resourceId + ": " + std::string(e.what()));
+      return ResourceHandle<T>();
+    } catch (...) {
+      Logger::logError("Unknown exception in ResourceHub::load() for " + resourceId);
       return ResourceHandle<T>();
     }
-
-    // Load the resource if needed
-    if (resource->getState() != ResourceState::Loaded) {
-      try {
-        // Call the load method to actually load the resource
-        bool loadSuccess = resource->load();
-
-        if (!loadSuccess) {
-          // Log or handle load failure
-          std::cerr << "Failed to load resource: " << resourceId << std::endl;
-        }
-
-        // Touch the node to update its access time
-        if (resourceNode) {
-          resourceNode->touch();
-        }
-
-        // Check if we need to enforce the memory budget
-        try {
-          enforceBudget();
-        } catch (const std::exception &e) {
-          // Log but continue if budget enforcement fails
-          std::cerr << "Error enforcing memory budget: " << e.what()
-                    << std::endl;
-        }
-      } catch (const std::exception &e) {
-        // Log loading error but continue with the resource handle
-        std::cerr << "Error loading resource " << resourceId << ": " << e.what()
-                  << std::endl;
-      }
-    }
-
-    return ResourceHandle<T>(std::static_pointer_cast<T>(resource),
-                             &ResourceHub::instance());
+    
+    // Fallback in case of any uncaught errors
+    return ResourceHandle<T>();
   }
 
   /**
@@ -185,7 +323,7 @@ public:
 
     // Add the request to the queue
     {
-      std::lock_guard<std::mutex> lock(queueMutex_);
+      std::lock_guard<std::timed_mutex> lock(queueMutex_);
       loadQueue_.push(request);
     }
 
@@ -360,6 +498,23 @@ public:
    * This method unloads and removes all resources from the manager.
    */
   void clear();
+  
+  /**
+   * @brief Reset the resource hub to a clean state
+   * 
+   * This method is useful for testing. It:
+   * 1. Disables worker threads
+   * 2. Clears all resources
+   * 3. Resets the memory budget to the default value
+   */
+  void reset();
+  
+  /**
+   * @brief Check if the resource hub is empty
+   * 
+   * @return true if the hub has no resources
+   */
+  bool isEmpty() const;
 
   /**
    * @brief Shutdown the resource manager
@@ -368,6 +523,10 @@ public:
    * The ResourceHub will no longer be usable after this call.
    */
   void shutdown();
+
+protected:
+  // For testing access - would normally be private but we need it in tests
+  CoordinatedGraph<std::shared_ptr<Resource>> resourceGraph_;
 
 private:
   ResourceHub();
@@ -384,10 +543,7 @@ private:
   void enforceBudget();
 
   // Static mutex
-  static std::mutex mutex_;
-
-  // Resource graph
-  CoordinatedGraph<std::shared_ptr<Resource>> resourceGraph_;
+  static std::timed_mutex mutex_;
 
   // Memory management
   std::atomic<size_t> memoryBudget_;
@@ -401,10 +557,10 @@ private:
                       ResourceLoadRequestComparator>
       loadQueue_;
 
-  // Synchronization
-  std::mutex queueMutex_;
-  std::mutex threadControlMutex_; // Mutex for thread creation/destruction
-  std::condition_variable queueCondition_;
+  // Synchronization with timed mutex support for safer thread management
+  std::timed_mutex queueMutex_;
+  std::timed_mutex threadControlMutex_; // Mutex for thread creation/destruction
+  std::condition_variable_any queueCondition_;
   std::atomic<bool> shutdown_{false};
 };
 
