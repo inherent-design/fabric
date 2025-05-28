@@ -1,6 +1,11 @@
 # 🌌 Fabric Engine
 
-*Reality is fluid. Perspective is everything.*
+<div align="center">
+  <!-- Add logo image once available -->
+  <p>Reality is fluid. Perspective is everything.</p>
+</div>
+
+> 🚧 **Work in Progress** - Fabric Engine is in active development. The engine is functional but not yet production-ready. APIs may change and documentation is evolving.
 
 ## Overview
 
